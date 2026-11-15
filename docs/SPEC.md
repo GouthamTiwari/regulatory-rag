@@ -45,36 +45,52 @@ Why these types: they exercise the four behaviours we are graded on (routing, ci
 
 All model calls are plain on-demand `InvokeModel` / `Converse` calls on the `bedrock-runtime` endpoint. Nothing is created in AWS (no Knowledge Bases, no OpenSearch Serverless, no provisioned throughput). *Why:* a call that is not made costs nothing; an always-on resource bills every hour.
 
-### 2.1 Models **[verified]**
+### 2.1 Models **[verified 2026-11-16]**
+
+> **Model change, 2026-11-16 (decision 7).** AWS Support confirmed that Goutham's account is billed by AWS India (AISPL) and, under the RBI payment-aggregator rule, cannot subscribe to paid AWS Marketplace products with a card. Anthropic Claude and Cohere models on Bedrock need such a subscription, so v1 uses **Amazon's own (first-party) models only**, which need no Marketplace subscription. Claude and Cohere stay documented below as the **upgrade path**: once the account switches to "Pay By Invoice", changing the three model IDs in `.env` is enough. Wherever older text in this spec says "Haiku", read "the default LLM" (Nova 2 Lite); "Sonnet" means "the final-run judge" (Nova Pro); "Cohere" means "the reranker" (Amazon Rerank 1.0).
+
+**v1 defaults (all Amazon first-party, no Marketplace):**
 
 | Role | Model | ID to pass as `modelId` | How it is served |
 |---|---|---|---|
-| Embeddings | Amazon Titan Text Embeddings V2 | `amazon.titan-embed-text-v2:0` | In-region only. No inference profile exists. |
-| Reranker | Cohere Rerank 3.5 | `cohere.rerank-v3-5:0` | In-region only. No inference profile exists. |
-| Reranker (fallback) | Amazon Rerank 1.0 | `amazon.rerank-v1:0` | In-region only. Not offered in us-east-1. |
-| Router, answer, judge for development runs | Claude Haiku 5.5 (launched 2026-10-07, newest Haiku) | `global.anthropic.claude-haiku-5-5` | **Inference profile required.** The base ID `anthropic.claude-haiku-5-5` has no in-region on-demand option on `bedrock-runtime` in any commercial region. |
-| Judge for the final reported run only | Claude Sonnet 5.5 (launched 2026-09-28) | `global.anthropic.claude-sonnet-5-5` | **Inference profile required**, same as Haiku. From Tokyo only the `global.` profile works: Sonnet 5.5 has `us.`, `eu.` and `au.` geo profiles but no `jp.` one. |
+| Embeddings | Amazon Titan Text Embeddings V2 | `amazon.titan-embed-text-v2:0` | In-region. No inference profile. |
+| Reranker | Amazon Rerank 1.0 | `amazon.rerank-v1:0` | In-region only: Tokyo, Canada, Frankfurt, Oregon. **Not** in Mumbai, Hyderabad or us-east-1. |
+| Router, answer, golden-set drafting, judge for development runs | Amazon Nova 2 Lite (launched 2025-12-02, newest Nova text model) | `global.amazon.nova-2-lite-v1:0` | **Inference profile required**: no in-region option in Tokyo. `jp.amazon.nova-2-lite-v1:0` also works (stays in Japan, about 10% dearer). |
+| Judge for the final reported run only | Amazon Nova Pro | `apac.amazon.nova-pro-v1:0` | **Geo profile required** from Tokyo; Nova Pro has no `global.` profile. *Why a different model:* a stronger model than the one that wrote the answers is a fairer judge. |
+
+**Upgrade path (needs Pay By Invoice on an AISPL account):**
+
+| Role | Model | ID |
+|---|---|---|
+| Reranker | Cohere Rerank 3.5 | `cohere.rerank-v3-5:0` (in-region, Tokyo yes) |
+| LLM | Claude Haiku 5.5 | `global.anthropic.claude-haiku-5-5` |
+| Final judge | Claude Sonnet 5.5 | `global.anthropic.claude-sonnet-5-5` |
 
 Sources:
 - Titan V2: https://docs.aws.amazon.com/bedrock/latest/userguide/model-card-amazon-titan-text-embeddings-v2.html
-- Cohere Rerank 3.5: https://docs.aws.amazon.com/bedrock/latest/userguide/model-card-cohere-rerank-3-5.html
 - Reranker regions: https://docs.aws.amazon.com/bedrock/latest/userguide/rerank-supported.html
+- Nova 2 Lite: https://docs.aws.amazon.com/bedrock/latest/userguide/model-card-amazon-nova-2-lite.html
+- Nova Pro: https://docs.aws.amazon.com/bedrock/latest/userguide/model-card-amazon-nova-pro.html
+- Cohere Rerank 3.5: https://docs.aws.amazon.com/bedrock/latest/userguide/model-card-cohere-rerank-3-5.html
 - Claude Haiku 5.5: https://docs.aws.amazon.com/bedrock/latest/userguide/model-card-anthropic-claude-haiku-5-5.html
-- Claude Sonnet 5.5 (checked 2026-11-16): https://docs.aws.amazon.com/bedrock/latest/userguide/model-card-anthropic-claude-sonnet-5-5.html
+- Claude Sonnet 5.5: https://docs.aws.amazon.com/bedrock/latest/userguide/model-card-anthropic-claude-sonnet-5-5.html
 - Model index: https://docs.aws.amazon.com/bedrock/latest/userguide/model-cards.html
 
 **What an inference profile is.** Instead of a model ID you pass a profile ID. Bedrock then picks a region with free capacity. The prefix says how far the request may travel:
 - `global.` : any commercial region. Standard price.
 - `us.`, `eu.`, `jp.`, `au.`, `ca.` : stays inside that geography. 10% more expensive.
-- There is **no `apac.` profile** for Haiku 5.5.
+- `apac.` : stays inside Asia-Pacific. Nova Pro offers only geo profiles, so from Tokyo it is `apac.`.
 
-We use `global.` *Why:* it is the cheapest, it works from every region, and our prompts contain only public documents, so there is no data-residency reason to pay 10% more.
+We use `global.` wherever it exists (Nova 2 Lite). *Why:* it is the cheapest, it works from every region, and our prompts contain only public documents, so there is no data-residency reason to pay 10% more.
 
 Model facts that affect our code **[verified on the model card]**:
 - Titan V2: 8K-token input, output size 256, 512 or 1024 numbers. Called with `InvokeModel` only (no Converse).
-- Cohere Rerank 3.5: about 4K tokens per query+document pair. Called with `InvokeModel`.
-- Haiku 5.5: 1M context, supports `Converse` and `InvokeModel`. "Adaptive thinking" is on by default and thinking tokens are billed as output tokens. The Count Tokens API is **not** supported on `bedrock-runtime`, so we take token counts from the `usage` field of each response.
-- Sonnet 5.5: same APIs. Thinking is on by default at a higher effort than Haiku and cannot be fully switched off, so expect more output tokens per judge call. Count Tokens is not supported either.
+- Amazon Rerank 1.0: called with `InvokeModel` on `bedrock-runtime`, billed per *search unit* ($1 per 1,000). Exact request/response field names **[to verify in Task 11's live test]**.
+- Nova 2 Lite: 1M context, 64K max output, supports `Converse` and `InvokeModel`. Reasoning is **off by default** (enabled only with `reasoningConfig`), so we pay no thinking tokens unless we turn it on. Count Tokens is not supported; token counts come from each response's `usage`. Its card says end of life is no sooner than 2026-12-02; if AWS announces a date, switch the ID in `.env`.
+- Nova Pro: 300K context, 10K max output, `Converse` and `InvokeModel`.
+- Cohere Rerank 3.5 (upgrade path): about 4K tokens per query+document pair. Called with `InvokeModel`.
+- Haiku 5.5 (upgrade path): 1M context, supports `Converse` and `InvokeModel`. "Adaptive thinking" is on by default and thinking tokens are billed as output tokens. The Count Tokens API is **not** supported on `bedrock-runtime`, so we take token counts from the `usage` field of each response.
+- Sonnet 5.5 (upgrade path): same APIs. Thinking is on by default at a higher effort than Haiku and cannot be fully switched off, so expect more output tokens per judge call. Count Tokens is not supported either.
 
 ### 2.2 Region
 
@@ -112,7 +128,7 @@ Sources **[verified]**: https://docs.aws.amazon.com/bedrock/latest/userguide/api
 **Recommendation for a solo developer: Option A, a long-term Bedrock API key with a 30-day expiry.**
 *Why:* if the key ever leaks, it can only call Bedrock and it dies on its own. An IAM access key lives for ever and can be given far wider powers by mistake. AWS labels long-term API keys "for exploration", which is exactly what this project is.
 
-**Consequence for the design:** because API keys cannot call the `bedrock-agent-runtime` `Rerank` API, the reranker is called through **`InvokeModel` on `bedrock-runtime`** with model ID `cohere.rerank-v3-5:0`. This way the same code works with either auth option.
+**Consequence for the design:** because API keys cannot call the `bedrock-agent-runtime` `Rerank` API, the reranker is called through **`InvokeModel` on `bedrock-runtime`** with model ID `amazon.rerank-v1:0` (or `cohere.rerank-v3-5:0` on the upgrade path). This way the same code works with either auth option.
 
 Rules for the code:
 - `boto3` reads these variables from the process environment, not from `.env` by itself. `config.py` must call `load_dotenv()` before any boto3 client is created.
@@ -131,44 +147,46 @@ Rules for the code:
       "Action": ["bedrock:InvokeModel", "bedrock:InvokeModelWithResponseStream"],
       "Resource": [
         "arn:aws:bedrock:ap-northeast-1::foundation-model/amazon.titan-embed-text-v2:0",
-        "arn:aws:bedrock:ap-northeast-1::foundation-model/cohere.rerank-v3-5:0",
-        "arn:aws:bedrock:ap-northeast-1:ACCOUNT_ID:inference-profile/global.anthropic.claude-haiku-5-5",
-        "arn:aws:bedrock:*::foundation-model/anthropic.claude-haiku-5-5*",
-        "arn:aws:bedrock:::foundation-model/anthropic.claude-haiku-5-5*",
-        "arn:aws:bedrock:ap-northeast-1:ACCOUNT_ID:inference-profile/global.anthropic.claude-sonnet-5-5",
-        "arn:aws:bedrock:*::foundation-model/anthropic.claude-sonnet-5-5*",
-        "arn:aws:bedrock:::foundation-model/anthropic.claude-sonnet-5-5*"
+        "arn:aws:bedrock:ap-northeast-1::foundation-model/amazon.rerank-v1:0",
+        "arn:aws:bedrock:ap-northeast-1:ACCOUNT_ID:inference-profile/global.amazon.nova-2-lite-v1:0",
+        "arn:aws:bedrock:*::foundation-model/amazon.nova-2-lite-v1:0",
+        "arn:aws:bedrock:::foundation-model/amazon.nova-2-lite-v1:0",
+        "arn:aws:bedrock:ap-northeast-1:ACCOUNT_ID:inference-profile/apac.amazon.nova-pro-v1:0",
+        "arn:aws:bedrock:*::foundation-model/amazon.nova-pro-v1:0"
       ]
     }
   ]
 }
 ```
 
-- A global inference profile needs permission on the profile **and** on the underlying model in the regions it can route to; that is why the Haiku and Sonnet lines use wildcards. The three Sonnet lines are needed only for the final judge run (Task 28).
+- A global inference profile needs permission on the profile **and** on the underlying model in the regions it can route to; that is why the Nova lines use wildcard regions. The two Nova Pro lines are needed only for the final judge run (Task 28). On the upgrade path, add the matching Cohere and Claude ARNs the same way.
 - With Option A the IAM user also needs `bedrock:CallWithBearerToken` (the default policy AWS attaches already allows API-key use).
 - **[to verify]** The exact ARN forms above come from the general AWS pattern, not from a page fetched today. Task 04's live test confirms them.
-- **[to verify]** Cohere and Anthropic models are sold through AWS Marketplace. The first call from a new account may need a one-time subscription (Marketplace permissions) and, for Anthropic, a one-time use-case form in the Bedrock console. Do the first call to each model from the Bedrock console playground while signed in as the account owner, before running any code.
+- **[verified by AWS Support, 2026-11-16]** Cohere and Anthropic models need an AWS Marketplace subscription, which this AISPL account cannot buy by card (RBI payment-aggregator rule; fix: switch to Pay By Invoice). This is why v1 uses Amazon models only. Amazon models need no Marketplace step; do one test call to Nova 2 Lite from the Bedrock console playground in Tokyo before running any code.
 - **Bedrock access is not confirmed yet.** The first live tests (Task 04) are what confirm that the account can call these models from Tokyo.
 
 **Credits and the budget alarm.** Goutham has $100 of AWS promotional credits. Two things to do in the AWS console before the first live test:
-1. Open **Billing → Credits** and read which services the credits cover. The Claude and Cohere model cards say these models are "billed through AWS Marketplace", and promotional credits often do not cover Marketplace charges. If the credits do not apply, Claude and rerank calls are charged to the card even while credits remain. **[to verify in the console; this cannot be checked from outside the account]**
+1. **[verified by AWS Support, 2026-11-16]** The account has USD 113.38 of credits valid until 2027-06-12 (Free Tier USD 53.38 plus three Explore AWS credits of USD 20), and all of them list Amazon Bedrock as an applicable product. Amazon first-party models are ordinary Bedrock charges, so the credits cover them. Whether credits would cover Marketplace-billed models (the upgrade path) is still unanswered.
 2. Create a monthly cost budget (for example $10) with an email alert, and in the budget's advanced options **untick "Credits"** so they are excluded. *Why:* with credits included, the budget shows $0 until the credits run out, so the alarm would never warn about real usage.
 
 ### 2.4 Prices (on-demand, USD) for cost logging
 
-| Model | Price | Status |
+| Model | Price (Tokyo, ap-northeast-1) | Status |
 |---|---|---|
-| Titan Text Embeddings V2 | $0.00002 per 1K input tokens ($0.02 per 1M) | **[partly verified]** AWS launch blog figure; the live AWS pricing table would not load in the fetch tool |
-| Cohere Rerank 3.5 | $2.00 per 1,000 queries ($0.002 per query). One query = up to 100 documents; more than 100 counts as extra queries | **[verified]** https://aws.amazon.com/bedrock/pricing/ |
-| Amazon Rerank 1.0 | $1.00 per 1,000 queries | **[to verify]** from memory only |
-| Claude Haiku 5.5, `global.` profile, prompt up to 100K tokens | $0.10 per 1M input, $0.50 per 1M output | **[verified]** Anthropic pricing page https://platform.claude.com/docs/en/about-claude/pricing plus a third-party Bedrock write-up; AWS table not readable |
-| Claude Haiku 5.5, geo profile (`jp.`, `us.`) | $0.11 per 1M input, $0.55 per 1M output (10% premium) | **[verified]** same sources |
-| Claude Haiku 5.5, prompt over 100K tokens | $0.50 input, $2.50 output per 1M (5x) | **[verified]** same sources. We never go near 100K. |
-| Claude Sonnet 5.5, `global.` profile | $2 per 1M input, $10 per 1M output (geo profiles +10%; not usable from Tokyo anyway) | **[verified]** Anthropic pricing page, same URL; AWS table not readable |
+| Titan Text Embeddings V2 | $0.029 per 1M input tokens ($0.000029 per 1K) | **[verified]** AWS Price List API, Tokyo, 2026-11-16 |
+| Amazon Rerank 1.0 | $1.00 per 1,000 search units ($0.001 per unit). A search unit is one query of up to 100 documents **[definition to verify in Task 11]** | **[verified price]** AWS Price List API, Tokyo |
+| Nova 2 Lite, `global.` profile | $0.36 per 1M input, $3.01 per 1M output | **[verified]** AWS Price List API, Tokyo (`cross-region-global` rate) |
+| Nova 2 Lite, `jp.` / in-region rate | $0.396 per 1M input, $3.311 per 1M output | **[verified]** same source |
+| Nova Pro | $0.96 per 1M input, $3.84 per 1M output | **[verified]** AWS Price List API, Tokyo (rate for the `apac.` profile assumed equal; Task 04 checks the bill) |
+| *Upgrade path:* Cohere Rerank 3.5 | $2.00 per 1,000 queries | **[verified]** https://aws.amazon.com/bedrock/pricing/ |
+| *Upgrade path:* Claude Haiku 5.5, `global.` | $0.10 per 1M input, $0.50 per 1M output | **[verified]** https://platform.claude.com/docs/en/about-claude/pricing |
+| *Upgrade path:* Claude Sonnet 5.5, `global.` | $2 per 1M input, $10 per 1M output | **[verified]** same source |
+
+Price source for the Amazon rows: `https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonBedrock/current/ap-northeast-1/index.json` (the public AWS Price List). *Why that file:* the pricing web page renders its tables with JavaScript and could not be read.
 
 Prices live in one file, `src/regrag/bedrock/pricing.py`, as a dictionary keyed by model ID, with a `PRICES_CHECKED_ON` date. *Why:* prices change; one place to update, and the log can say how old the numbers are.
 
-**Rough budget.** Embedding the whole corpus (about 1.5M tokens): about $0.03. One question: rerank $0.002 + Haiku about $0.001 = roughly $0.003. One development evaluation (120 questions x 4 configurations, Haiku as judge): under $2. The single final reported run with Sonnet 5.5 as judge (about 480 judged answers, each roughly 4K tokens in and 400 out including thinking): about $6. Everything in this project together should stay well under $20.
+**Rough budget.** Embedding the whole corpus (about 1.5M tokens): about $0.05. One question: rerank $0.001 + Nova 2 Lite about $0.002 (3K tokens in, 300 out) = roughly $0.003. One development evaluation (120 questions x 4 configurations, Nova 2 Lite as judge): under $3. The single final reported run with Nova Pro as judge (about 480 judged answers, about 4K tokens in and 300 out each): about $2.50. Everything together should stay well under $20, inside the free credits.
 
 ---
 
@@ -362,9 +380,9 @@ Package name: `regrag` (in `src/regrag/`). Every number below is a **starting va
 | **Keyword retrieve ("BM25")** | Question, route | Top 30 chunks | Postgres full-text search, `websearch_to_tsquery` + `ts_rank_cd`. **Honest note:** this is Postgres's ranking, which is similar in spirit to BM25 but not the exact formula. The config name stays `bm25` (short, and matches `CLAUDE.md`), but every results table and the README label it **"keyword (Postgres FTS, BM25-like)"**. True BM25 is a non-goal for v1 |
 | **Vector retrieve** | Question embedding, route | Top 30 chunks | Cosine distance on the HNSW index; `hnsw.ef_search = 100`: higher than the default 40 so filtered searches still return 30 rows |
 | **Fuse (RRF)** | Two ranked lists | Top 30 fused | Reciprocal Rank Fusion, `score = sum(1 / (k + rank))`, **k = 60**: the value from the original RRF paper; it uses ranks, not raw scores, so the two very different scoring scales need no calibration |
-| **Rerank** | Question + 30 chunks | Top 8 with scores 0 to 1 | Cohere Rerank 3.5 via `InvokeModel`. 30 documents = 1 billed query ($0.002). **top_n = 8**: enough context for multi-part questions, small enough to keep the prompt cheap. Request body to use: `{"api_version": 2, "query": ..., "documents": [...], "top_n": 8}`; response `results[].index` and `results[].relevance_score` **[to verify in Task 11's live test; the AWS parameter page did not load]** |
+| **Rerank** | Question + 30 chunks | Top 8 with scores 0 to 1 | Amazon Rerank 1.0 via `InvokeModel` (Cohere Rerank 3.5 on the upgrade path). 30 documents = 1 billed search unit ($0.001). **top_n = 8**: enough context for multi-part questions, small enough to keep the prompt cheap. Request and response field names for each reranker **[to verify in Task 11's live test]**; the code keeps one small adapter per reranker model |
 | **Supersession filter/flag** | 8 chunks | Chunks annotated; some replaced | If a chunk's document has status `superseded`/`withdrawn` **and** the superseding document is in the corpus: keep at most one such chunk, mark it `SUPERSEDED BY <doc>`, and make sure at least the top chunk of the newer document is present. If the document is only `amended`: keep it and attach the amending reference. Never silently drop: the user may be asking about the old rule on purpose |
-| **Generate** | Question + annotated chunks | Answer text with citation markers | Haiku 5.5 via `Converse`, `maxTokens = 1500` (includes thinking tokens). Each chunk is shown as `[C1] doc title | section | pages`. The model must put `[C#]` after every claim and must reply `INSUFFICIENT_EVIDENCE` if the chunks do not answer the question. Send only `maxTokens` in `inferenceConfig` at first; add temperature only if the live test shows the model accepts it **[to verify]** |
+| **Generate** | Question + annotated chunks | Answer text with citation markers | Nova 2 Lite via `Converse` (reasoning off), `maxTokens = 1500`. Each chunk is shown as `[C1] doc title | section | pages`. The model must put `[C#]` after every claim and must reply `INSUFFICIENT_EVIDENCE` if the chunks do not answer the question. Send `maxTokens` and `temperature = 0` in `inferenceConfig` (Nova accepts both; a low temperature keeps answers repeatable for evaluation) |
 | **Validate** | Answer + chunks | Final answer or abstention | (a) Every `[C#]` must match a supplied chunk; an unknown marker fails validation. (b) Every sentence that states a rule must carry a citation. (c) **Abstain if top rerank score < 0.30**, or the model said `INSUFFICIENT_EVIDENCE`, or (a) fails after one retry. 0.30 is a guess; Task 28 picks the value that best separates answerable from unanswerable golden questions |
 | **Log** | Everything above | One `query_logs` row + one JSON line on stdout | Latency per stage, tokens, cost from `pricing.py`, chunk IDs |
 
@@ -404,7 +422,7 @@ File `data/golden/golden.jsonl`, one JSON object per line. **This schema is stab
 
 | Type | Count | How |
 |---|---|---|
-| factual, RBI | 35 | Haiku drafts 3 questions per sampled chunk; Goutham keeps the good ones and fixes the reference answer |
+| factual, RBI | 35 | The default LLM (Nova 2 Lite) drafts 3 questions per sampled chunk; Goutham keeps the good ones and fixes the reference answer |
 | factual, GST | 35 | Same |
 | table lookups | 10 | Hand-picked chunks with `content_type = table` |
 | cross_corpus | 10 | Hand-written |
@@ -423,7 +441,7 @@ Retrieval metrics use only questions with `should_abstain = false`. A retrieved 
 - **MRR**: per question, 1 / rank of the first relevant chunk in the top 10, or 0 if none. Report the mean.
 - **Citation validity**: of all citation markers in all non-abstained answers, the fraction that point to a chunk that was actually given to the model. Target 100%; the validator enforces it.
 - **Citation accuracy**: of all cited chunks in non-abstained answers, the fraction whose `doc_id` is in the question's `expected_doc_ids`.
-- **Faithfulness** (LLM judge): for each non-abstained answer, the judge gets the answer and the cited chunks and labels each sentence `supported` or `unsupported`. Score = supported / total sentences; report the mean. Judge model is set by `BEDROCK_JUDGE_MODEL_ID`: **Haiku 5.5 for development runs** (the default), **Sonnet 5.5 for the one final reported run** in Task 28. *Why two:* Haiku judging Haiku's own answers is cheap but can be lenient, so the number we publish comes from a stronger, different model; using Sonnet for every development run would cost about $6 each time. The results file records which judge was used.
+- **Faithfulness** (LLM judge): for each non-abstained answer, the judge gets the answer and the cited chunks and labels each sentence `supported` or `unsupported`. Score = supported / total sentences; report the mean. Judge model is set by `BEDROCK_JUDGE_MODEL_ID`: **Nova 2 Lite for development runs** (the default), **Nova Pro for the one final reported run** in Task 28 (Claude Sonnet 5.5 on the upgrade path). *Why two:* a model judging its own answers is cheap but can be lenient, so the number we publish comes from a stronger, different model. The results file records which judge was used.
 - **Abstention correctness**: over all questions, the fraction where `abstained == should_abstain`. Also report abstention precision and recall. *Why both:* a system that abstains on everything gets perfect recall and is useless.
 - **Supersession flag rate**: for `must_flag_supersession = true` questions, the fraction of answers with a non-empty `supersession_notes`.
 - Also per run: mean and p95 latency, mean cost per question.
@@ -435,7 +453,7 @@ Retrieval metrics use only questions with `should_abstain = false`. A retrieved 
 | `bm25` | keyword (Postgres FTS, BM25-like) | yes | | | |
 | `vector` | vector (Titan V2) | | yes | | |
 | `hybrid` | hybrid (keyword + vector, RRF) | yes | yes | yes | |
-| `hybrid_rerank` | hybrid + rerank (Cohere Rerank 3.5) | yes | yes | yes | yes |
+| `hybrid_rerank` | hybrid + rerank (Amazon Rerank 1.0) | yes | yes | yes | yes |
 
 Router, supersession step, generator and validator are identical in all four. *Why:* only one thing changes per comparison, so differences are caused by retrieval. In configurations without a reranker the abstain rule uses only the model's `INSUFFICIENT_EVIDENCE` signal.
 
@@ -527,8 +545,9 @@ Rule for builders: pipeline stages receive their collaborators as arguments (dep
 1. **Region: `ap-northeast-1` (Tokyo); fallback `us-east-1`.** *Why:* Mumbai has no reranker, and Tokyo is the nearest region where embeddings, reranker and Claude all work on-demand.
 2. **GST source: `gstcouncil.gov.in` is the official source for v1. Circulars 251 and above stay out of v1.** *Why:* it is a government site that lists the CBIC circulars with PDFs, while `cbic-gst.gov.in` no longer does; the newer circulars could not be confirmed on any official page, and we do not invent URLs.
 3. **AWS account: $100 of promotional credits; Bedrock access not yet confirmed.** Check in Billing → Credits whether the credits cover Claude and Cohere (Marketplace-billed), and create the budget alarm with "Credits" excluded (section 2.3). Task 04's live test confirms access. *Why:* credits may not cover Marketplace models, and a budget that counts credits stays at $0 and never warns.
-4. **Faithfulness judge: Claude Haiku 5.5 for development runs, Claude Sonnet 5.5 (`global.anthropic.claude-sonnet-5-5`) for the final reported run in Task 28, about $6.** *Why:* a stronger, different model is a fairer judge of Haiku's answers, but it is 20 times the price, so we pay for it once.
+4. **Faithfulness judge (amended by decision 7): Nova 2 Lite for development runs, Nova Pro (`apac.amazon.nova-pro-v1:0`) for the final reported run in Task 28, about $2.50.** Originally Claude Haiku / Sonnet 5.5. *Why:* a stronger, different model is a fairer judge of Haiku's answers, but it is 20 times the price, so we pay for it once.
 5. **Keyword leg: Postgres full-text search is accepted as the "BM25" leg.** Config name stays `bm25`; results and README label it "keyword (Postgres FTS, BM25-like)". *Why:* it needs no extra software, and the honest label avoids claiming an algorithm we do not run.
 6. **Golden set: target about 120 reviewed questions; fallback 60 if review time runs short** (mix in section 6.2). *Why:* 120 gives steadier numbers, but 60 well-reviewed questions are worth more than 120 unchecked ones.
+7. **Models: Amazon first-party only for v1 (approved 2026-11-16).** Titan V2 embeddings, Amazon Rerank 1.0, Nova 2 Lite (`global.amazon.nova-2-lite-v1:0`) as the LLM, Nova Pro as the final judge. Region stays Tokyo, the only nearby region with Amazon Rerank. *Why:* AWS Support confirmed that the AISPL account cannot subscribe to Marketplace models (Claude, Cohere) by card. Amazon models need no Marketplace step and are covered by the account's credits. Claude and Cohere remain a one-line `.env` upgrade after a switch to Pay By Invoice, which the Protocols from Task 02 make possible without code changes.
 
 Still to confirm during the build (not blocking): the items marked **[to verify]** in sections 2.3, 2.4 and 5. Each names the task that checks it.

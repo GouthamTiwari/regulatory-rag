@@ -8,7 +8,7 @@ from pathlib import Path
 import pytest
 from pydantic import ValidationError
 
-from regrag.config import HAIKU_PROFILE_ID, Settings
+from regrag.config import NOVA_LITE_PROFILE_ID, NOVA_PRO_PROFILE_ID, Settings
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
@@ -58,7 +58,7 @@ def test_defaults_without_env(clean_env):
     assert s.aws_region == "ap-northeast-1"
     assert s.aws_bearer_token_bedrock.get_secret_value() == ""
     assert s.aws_secret_access_key.get_secret_value() == ""
-    assert s.bedrock_llm_model_id == HAIKU_PROFILE_ID
+    assert s.bedrock_llm_model_id == NOVA_LITE_PROFILE_ID
     assert s.postgres_port == 5433
 
 
@@ -68,16 +68,16 @@ def test_empty_values_fall_back_to_defaults(clean_env):
     clean_env.setenv("AWS_REGION", "")
     clean_env.setenv("POSTGRES_PORT", "")
     s = Settings()
-    assert s.bedrock_judge_model_id == HAIKU_PROFILE_ID
+    assert s.bedrock_judge_model_id == NOVA_LITE_PROFILE_ID
     assert s.aws_region == "ap-northeast-1"
     assert s.postgres_port == 5433
 
 
 def test_env_overrides_defaults(clean_env):
-    clean_env.setenv("BEDROCK_JUDGE_MODEL_ID", "global.anthropic.claude-sonnet-5-5")
+    clean_env.setenv("BEDROCK_JUDGE_MODEL_ID", NOVA_PRO_PROFILE_ID)
     clean_env.setenv("RERANK_TOP_N", "6")
     s = Settings()
-    assert s.bedrock_judge_model_id == "global.anthropic.claude-sonnet-5-5"
+    assert s.bedrock_judge_model_id == NOVA_PRO_PROFILE_ID
     assert s.rerank_top_n == 6
 
 

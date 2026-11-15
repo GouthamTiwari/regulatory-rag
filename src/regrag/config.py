@@ -16,9 +16,13 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 # overwrites a variable that is already set in the real environment.
 load_dotenv()
 
-# The answering model is reached through a global cross-region inference profile: the base
-# model ID has no in-region on-demand option, and `global.` is the cheapest prefix (SPEC 2.1).
-HAIKU_PROFILE_ID = "global.anthropic.claude-haiku-5-5"
+# v1 uses Amazon first-party models only: this AISPL (India) account can't subscribe to the
+# AWS Marketplace models (Claude, Cohere) by card (SPEC decision 7). Nova 2 Lite has no
+# in-region option in Tokyo, so it goes through the global inference profile, which is
+# also the cheapest prefix (SPEC 2.1).
+NOVA_LITE_PROFILE_ID = "global.amazon.nova-2-lite-v1:0"
+# Stronger model for the final reported judge run. It has no `global.` profile; `apac.` works.
+NOVA_PRO_PROFILE_ID = "apac.amazon.nova-pro-v1:0"
 
 
 class Settings(BaseSettings):
@@ -38,12 +42,15 @@ class Settings(BaseSettings):
     # --- Bedrock model IDs (SPEC 2.1) ---------------------------------------------------
     # 1024-dim embeddings, in-region, $0.02 per 1M tokens.
     bedrock_embed_model_id: str = "amazon.titan-embed-text-v2:0"
-    # Called via InvokeModel because Bedrock API keys can't use the agent-runtime Rerank API.
-    bedrock_rerank_model_id: str = "cohere.rerank-v3-5:0"
+    # Amazon's own reranker (Tokyo has it; Mumbai doesn't). Called via InvokeModel because
+    # Bedrock API keys can't use the agent-runtime Rerank API. Upgrade: cohere.rerank-v3-5:0.
+    bedrock_rerank_model_id: str = "amazon.rerank-v1:0"
     # Router and answer model: cheap and fast enough to call twice per question.
-    bedrock_llm_model_id: str = HAIKU_PROFILE_ID
-    # Faithfulness judge: Haiku for development runs; Task 28 uses Sonnet 5.5 for the final run.
-    bedrock_judge_model_id: str = HAIKU_PROFILE_ID
+    # Upgrade: global.anthropic.claude-haiku-5-5.
+    bedrock_llm_model_id: str = NOVA_LITE_PROFILE_ID
+    # Faithfulness judge for development runs. Task 28 sets NOVA_PRO_PROFILE_ID for the final
+    # run (upgrade: global.anthropic.claude-sonnet-5-5).
+    bedrock_judge_model_id: str = NOVA_LITE_PROFILE_ID
 
     # --- Local Postgres in Docker (SPEC 4) ------------------------------------------------
     postgres_user: str = "regrag"

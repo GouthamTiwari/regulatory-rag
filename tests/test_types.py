@@ -34,7 +34,7 @@ def _sample_result() -> QueryResult:
         usage=Usage(input_tokens=1200, output_tokens=180, embed_tokens=12, rerank_queries=1),
         cost_usd=0.00225,
         latency_ms={"retrieve": 41.5, "generate": 950.0},
-        model_ids={"llm": "global.anthropic.claude-haiku-5-5"},
+        model_ids={"llm": "global.amazon.nova-2-lite-v1:0"},
     )
 
 

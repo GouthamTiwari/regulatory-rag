@@ -99,13 +99,13 @@ If a builder finds it needs a new dependency, a new setting or a change to a typ
 
 - **Files:** C `src/regrag/bedrock/client.py`, C `src/regrag/bedrock/pricing.py`, C `tests/bedrock/test_client.py`, C `tests/bedrock/test_pricing.py`, C `tests/bedrock/test_live_auth.py`
 - **Depends on:** 02. **Parallel:** G3.
-- **Do:** `get_runtime_client(settings)` returns a cached `boto3` `bedrock-runtime` client for the configured region with adaptive retries; raises a clear error naming the missing env vars if neither auth option is set. `pricing.py`: price table from SPEC section 2.4 keyed by model ID (including `global.anthropic.claude-sonnet-5-5` at $2 / $10 per 1M), `PRICES_CHECKED_ON`, and `cost_usd(model_id, input_tokens=0, output_tokens=0, rerank_queries=0)`. Unknown model ID raises.
+- **Do:** `get_runtime_client(settings)` returns a cached `boto3` `bedrock-runtime` client for the configured region with adaptive retries; raises a clear error naming the missing env vars if neither auth option is set. `pricing.py`: price table from SPEC section 2.4 keyed by model ID (the Amazon v1 models plus the upgrade-path Claude and Cohere IDs), `PRICES_CHECKED_ON`, and `cost_usd(model_id, input_tokens=0, output_tokens=0, rerank_queries=0)`. `rerank_queries` counts Amazon Rerank search units or Cohere queries, whichever the model bills. Unknown model ID raises.
 - **Acceptance:**
-  - Unit tests: missing credentials give the clear error; cost of 1M Haiku input tokens on the global profile is 0.10; 1 rerank query is 0.002; 1,000 Titan tokens is 0.00002.
+  - Unit tests: missing credentials give the clear error; cost of 1M Nova 2 Lite input tokens on the global profile is 0.36 and 1M output tokens is 3.01; 1 Amazon Rerank search unit is 0.001; 1M Titan tokens is 0.029.
   - No secret value appears in any exception message or log line (test).
-  - Unit test: 1M Sonnet 5.5 input tokens cost 2.00 and 1M output tokens cost 10.00.
-  - `live` test: one minimal `Converse` call to the configured Haiku profile returns text and a `usage` block. **This is the first proof that the account has Bedrock access from Tokyo.** If it fails with an access or subscription error, the builder stops and reports the exact error (no workarounds). Changelog records which auth option was used (not the key) and confirms or corrects the IAM ARNs in SPEC section 2.3.
-  - Before the live test, Goutham has done the two console steps in SPEC section 2.3 (checked what the credits cover; created the budget alarm with "Credits" excluded). The changelog records "done" or "not done", nothing more.
+  - Unit test: 1M Nova Pro input tokens cost 0.96 and 1M output tokens cost 3.84; upgrade-path IDs (Haiku 5.5, Sonnet 5.5, Cohere Rerank 3.5) are priced too.
+  - `live` test: one minimal `Converse` call to the configured LLM (`global.amazon.nova-2-lite-v1:0`) returns text and a `usage` block. **This is the first proof that the account has Bedrock access from Tokyo.** If it fails with an access or subscription error, the builder stops and reports the exact error (no workarounds). Changelog records which auth option was used (not the key) and confirms or corrects the IAM ARNs in SPEC section 2.3.
+  - Before the live test, Goutham has done the two console steps in SPEC section 2.3 (credits confirmed by AWS Support; budget alarm created with "Credits" excluded). The changelog records "done" or "not done", nothing more.
 
 ## Task 05: Manifest and relations files
 
@@ -170,23 +170,23 @@ If a builder finds it needs a new dependency, a new setting or a change to a typ
   - Mocked tests: order preserved with concurrency; throttling error is retried; token total is correct; empty list returns empty result without calling AWS.
   - `live` test: two sentences give two 1024-length vectors with length about 1.0; the changelog records observed latency from the configured region.
 
-## Task 11: Reranker (Cohere Rerank 3.5)
+## Task 11: Reranker (Amazon Rerank 1.0, Cohere adapter)
 
 - **Files:** C `src/regrag/bedrock/reranker.py`, C `tests/bedrock/test_reranker.py`
 - **Depends on:** 04. **Parallel:** G4.
-- **Do:** `CohereReranker` implementing `Reranker` via `InvokeModel` on `bedrock-runtime` (not the `bedrock-agent-runtime` Rerank API: that one does not accept Bedrock API keys). Sends at most 100 documents per call. Returns chunks sorted by score with `rerank_score` set; records `rerank_queries` for cost. Also `NoopReranker` that returns the first `top_n` unchanged (used by the non-rerank eval configurations).
+- **Do:** `BedrockReranker` implementing `Reranker` via `InvokeModel` on `bedrock-runtime` (not the `bedrock-agent-runtime` Rerank API: that one does not accept Bedrock API keys). It picks a small request/response adapter from the model ID: `amazon.rerank-v1:0` (the v1 default) and `cohere.rerank-v3-5:0` (upgrade path); an unknown ID raises. Sends at most 100 documents per call. Returns chunks sorted by score with `rerank_score` set; records `rerank_queries` for cost. Also `NoopReranker` that returns the first `top_n` unchanged (used by the non-rerank eval configurations).
 - **Acceptance:**
-  - Mocked tests: response indexes map back to the right chunks; `top_n` respected; more than 100 chunks is split and billed as 2 queries; empty input makes no call.
-  - `live` test: 3 short passages, the obviously relevant one ranks first. **The changelog confirms the exact request/response field names** (SPEC marks them "to verify").
+  - Mocked tests: response indexes map back to the right chunks; `top_n` respected; more than 100 chunks is split and billed as 2 queries; empty input makes no call; both adapters build the right request body.
+  - `live` test (Amazon Rerank only; Cohere is not accessible on this account): 3 short passages, the obviously relevant one ranks first. **The changelog confirms the exact request/response field names and what one billed search unit covers** (SPEC marks them "to verify").
 
-## Task 12: LLM wrapper (Claude Haiku 5.5)
+## Task 12: LLM wrapper (Converse; Nova 2 Lite by default)
 
 - **Files:** C `src/regrag/bedrock/llm.py`, C `tests/bedrock/test_llm.py`
 - **Depends on:** 04. **Parallel:** G4.
-- **Do:** `ClaudeLLM.complete(system, user, max_tokens) -> (text, Usage)` using `Converse` with the configured inference profile ID. Extracts only text blocks (ignores thinking blocks), returns input/output tokens from `usage`, raises a clear error on `stopReason == "max_tokens"` with empty text.
+- **Do:** `BedrockLLM.complete(system, user, max_tokens) -> (text, Usage)` using `Converse` with the configured model or inference profile ID; it works for Nova and Claude alike, with no model-specific code. Sends `temperature=0`. Extracts only text blocks (ignores reasoning/thinking blocks), returns input/output tokens from `usage`, raises a clear error on `stopReason == "max_tokens"` with empty text.
 - **Acceptance:**
   - Mocked tests: text extracted when the response also contains a non-text block; usage mapped; throttling retried.
-  - `live` test: a one-line prompt returns text; the changelog records whether `temperature` is accepted by this model (SPEC marks this "to verify") and typical output-token overhead from thinking.
+  - `live` test: a one-line prompt to Nova 2 Lite returns text; the changelog records latency from Tokyo and the output-token count for a short answer.
 
 ## Task 13: Repository (database reads and writes)
 
@@ -314,7 +314,7 @@ If a builder finds it needs a new dependency, a new setting or a change to a typ
 
 - **Files:** C `src/regrag/eval/judge.py`, C `tests/eval/test_judge.py`
 - **Depends on:** 12. **Parallel:** G5.
-- **Do:** `judge_faithfulness(answer, cited_chunks, llm) -> (score, per_sentence, usage)`: splits the answer into sentences, asks the judge model for a JSON list of `supported`/`unsupported` with a short reason, parses it strictly, retries once on bad JSON, returns `None` (not 0) if it still fails. The judge model comes from settings (`BEDROCK_JUDGE_MODEL_ID`; default Claude Haiku 5.5 for development, Claude Sonnet 5.5 for the final run in Task 28). The code must not assume which model it is: no model name in the prompt, and it reads only text blocks from the reply, because Sonnet 5.5 always returns thinking blocks too. Returns the judge model ID alongside the usage so the report can show it.
+- **Do:** `judge_faithfulness(answer, cited_chunks, llm) -> (score, per_sentence, usage)`: splits the answer into sentences, asks the judge model for a JSON list of `supported`/`unsupported` with a short reason, parses it strictly, retries once on bad JSON, returns `None` (not 0) if it still fails. The judge model comes from settings (`BEDROCK_JUDGE_MODEL_ID`; default Nova 2 Lite for development, Nova Pro for the final run in Task 28, Claude Sonnet 5.5 on the upgrade path). The code must not assume which model it is: no model name in the prompt, and it reads only text blocks from the reply, because some models (Claude Sonnet) also return thinking blocks. Returns the judge model ID alongside the usage so the report can show it.
 - **Acceptance (mocked LLM):**
   - 3 of 4 sentences supported gives 0.75.
   - Malformed JSON is retried once, then yields `None` and is counted as "judge failed".
@@ -325,19 +325,19 @@ If a builder finds it needs a new dependency, a new setting or a change to a typ
 
 - **Files:** C `src/regrag/eval/run.py`, C `src/regrag/eval/__main__.py`, C `tests/eval/test_run.py`, C `docs/eval/results.md`, C `docs/eval/results.json`
 - **Depends on:** 22, 23, 24, 25. **Parallel:** no (G7).
-- **Do:** `uv run python -m regrag.eval [--configs bm25,vector,hybrid,hybrid_rerank] [--retrieval-only] [--limit N] [--out docs/eval]`: for each configuration and each reviewed golden question, call `answer_question` (or only the retriever in `--retrieval-only`), compute all metrics, write a Markdown comparison table and raw JSON (per-question rows included), and print total cost. Before starting it prints the estimated cost, the question count and the judge model ID. The table uses the honest labels from SPEC section 6.4 (the `bm25` config is shown as "keyword (Postgres FTS, BM25-like)"). Commit a **sample** result from the 20 seed questions, run with the default Haiku judge and clearly labelled "sample, not final".
+- **Do:** `uv run python -m regrag.eval [--configs bm25,vector,hybrid,hybrid_rerank] [--retrieval-only] [--limit N] [--out docs/eval]`: for each configuration and each reviewed golden question, call `answer_question` (or only the retriever in `--retrieval-only`), compute all metrics, write a Markdown comparison table and raw JSON (per-question rows included), and print total cost. Before starting it prints the estimated cost, the question count and the judge model ID. The table uses the honest labels from SPEC section 6.4 (the `bm25` config is shown as "keyword (Postgres FTS, BM25-like)"). Commit a **sample** result from the 20 seed questions, run with the default Nova 2 Lite judge and clearly labelled "sample, not final".
 - **Acceptance:**
   - Unit test with a fake pipeline: 4 configurations x 3 questions produce a table with 4 rows and all metric columns; a question that raises is recorded as an error row and the run continues.
   - `--retrieval-only` makes zero LLM and zero rerank calls for `bm25`, `vector`, `hybrid` (asserted with fakes).
   - `results.md` states date, golden-set size, model IDs (generator and judge separately), region and `PRICES_CHECKED_ON`.
-  - The cost estimate uses the judge model's own price (test: switching the judge to the Sonnet ID raises the estimate).
+  - The cost estimate uses the judge model's own price (test: switching the judge to the Nova Pro ID raises the estimate).
   - The string "BM25" never appears alone as a row label in `results.md`.
 
 ## Task 27: Grow the golden set to ~120
 
 - **Files:** C `src/regrag/eval/draft_questions.py`, C `tests/eval/test_draft_questions.py`, E `data/golden/golden.jsonl`
 - **Depends on:** 14, 23. **Parallel:** G6 (with 22).
-- **Do:** `python -m regrag.eval.draft_questions --per-corpus 60 --out data/golden/drafts.jsonl`: samples chunks spread across documents (and a set of table chunks), asks Haiku for candidate question + answer + the section it came from, writes drafts with `source="llm_drafted", reviewed=false`. `drafts.jsonl` is a scratch file and is **not** committed (the builder adds nothing to `.gitignore`; it simply does not stage it, and says so in the changelog). Goutham reviews; accepted rows are appended to `golden.jsonl` with `reviewed=true`. Hand-write the `superseded`, `cross_corpus` and `abstain` rows to reach the counts in SPEC section 6.2.
+- **Do:** `python -m regrag.eval.draft_questions --per-corpus 60 --out data/golden/drafts.jsonl`: samples chunks spread across documents (and a set of table chunks), asks the default LLM (Nova 2 Lite) for candidate question + answer + the section it came from, writes drafts with `source="llm_drafted", reviewed=false`. `drafts.jsonl` is a scratch file and is **not** committed (the builder adds nothing to `.gitignore`; it simply does not stage it, and says so in the changelog). Goutham reviews; accepted rows are appended to `golden.jsonl` with `reviewed=true`. Hand-write the `superseded`, `cross_corpus` and `abstain` rows to reach the counts in SPEC section 6.2.
 - **Acceptance:**
   - Mocked test: sampling covers every document at least once before repeating; output rows validate against the loader.
   - `golden.jsonl` has at least 110 reviewed rows with counts per type within 3 of the plan in SPEC section 6.2. **Fallback, only if Goutham says review time has run short: at least 60 reviewed rows** with the halved mix in SPEC section 6.2 (18 RBI, 18 GST, 5 table, 5 cross-corpus, 7 superseded, 7 abstain; each within 2). The changelog states which target was used and the final counts per type.
@@ -347,11 +347,11 @@ If a builder finds it needs a new dependency, a new setting or a change to a typ
 
 - **Files:** E `src/regrag/config.py` (tuned values only), E `docs/eval/results.md`, E `docs/eval/results.json`, C `docs/eval/tuning-notes.md`
 - **Depends on:** 26, 27. **Parallel:** no (G8).
-- **Do:** Two phases. **Phase 1, tuning (Haiku judge, the default):** run the full four-way evaluation and tune as described below. **Phase 2, final reported run (Sonnet judge):** with the tuned settings frozen, run the four-way evaluation once more with `BEDROCK_JUDGE_MODEL_ID=global.anthropic.claude-sonnet-5-5` set in the local `.env` (or the shell) for this run only; expected cost about $6. This run produces the committed `results.md` / `results.json`. The default in `config.py` stays Haiku. Do one single Sonnet call first to confirm access before starting the full run; if Sonnet is not accessible, stop and report rather than publishing Haiku-judged numbers as final. Tuning details: Choose the abstain threshold by sweeping 0.05 to 0.60 on the `hybrid_rerank` results and picking the value with the best abstention accuracy (the sweep reuses stored rerank scores, so it costs nothing). Try at most two further changes (for example rerank top-n 6 vs 8) and keep only what improves the numbers. Write what was tried and why in `tuning-notes.md`.
+- **Do:** Two phases. **Phase 1, tuning (Nova 2 Lite judge, the default):** run the full four-way evaluation and tune as described below. **Phase 2, final reported run (Nova Pro judge):** with the tuned settings frozen, run the four-way evaluation once more with `BEDROCK_JUDGE_MODEL_ID=apac.amazon.nova-pro-v1:0` set in the local `.env` (or the shell) for this run only; expected cost about $2.50. This run produces the committed `results.md` / `results.json`. The default in `config.py` stays Nova 2 Lite. Do one single Nova Pro call first to confirm access before starting the full run; if it is not accessible, stop and report rather than publishing self-judged numbers as final. Tuning details: Choose the abstain threshold by sweeping 0.05 to 0.60 on the `hybrid_rerank` results and picking the value with the best abstention accuracy (the sweep reuses stored rerank scores, so it costs nothing). Try at most two further changes (for example rerank top-n 6 vs 8) and keep only what improves the numbers. Write what was tried and why in `tuning-notes.md`.
 - **Acceptance:**
-  - `results.md` has the final table for all four configurations on the full reviewed set, with total cost of the run, the number of questions used, and the judge model shown as Claude Sonnet 5.5 (`global.anthropic.claude-sonnet-5-5`).
-  - `tuning-notes.md` also shows faithfulness from the Haiku-judged run next to the Sonnet-judged run for `hybrid_rerank`, so the reader can see how much the judge matters.
-  - `git diff` shows `BEDROCK_JUDGE_MODEL_ID` default unchanged (Haiku) and no `.env` committed.
+  - `results.md` has the final table for all four configurations on the full reviewed set, with total cost of the run, the number of questions used, and the judge model shown as Amazon Nova Pro (`apac.amazon.nova-pro-v1:0`).
+  - `tuning-notes.md` also shows faithfulness from the Nova-2-Lite-judged run next to the Nova-Pro-judged run for `hybrid_rerank`, so the reader can see how much the judge matters.
+  - `git diff` shows `BEDROCK_JUDGE_MODEL_ID` default unchanged (Nova 2 Lite) and no `.env` committed.
   - Citation validity is 100% for every configuration (if not, that is a bug to send back, not a number to report).
   - `tuning-notes.md` lists each changed setting: old value, new value, metric before and after.
   - All tests still pass with the new defaults.
