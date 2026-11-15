@@ -1,0 +1,9 @@
+# Secrets: never commit real keys (ship .env.example instead)
+.env
+
+# Python virtual environment and caches (recreated by `uv sync`)
+.venv/
+__pycache__/
+
+# Raw PDFs stay local; data/manifest.csv lets anyone re-download them
+data/raw/
