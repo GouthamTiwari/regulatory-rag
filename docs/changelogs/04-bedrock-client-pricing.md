@@ -23,8 +23,15 @@ Branch: task/04-bedrock-client-pricing | Date: 2026-11-16
 - `test_live_auth.py` (1, `live`): one `Converse` call to Nova 2 Lite.
 - Result: 65 passed, 0 failed; live: 1 skipped (no key yet).
 
+## Live result (2026-11-16, after the region change to Mumbai, SPEC decision 8)
+- `uv run pytest -m live tests/bedrock/test_live_auth.py -s` → 1 passed:
+  `auth=api_key region=ap-south-1 model=global.amazon.nova-2-lite-v1:0 reply='pong' tokens=53/2 latency=0.93s cost=$0.000024`
+- Manual checks run the same day:
+  - Titan V2 in Mumbai returned a 1024-dim vector (7 tokens, 0.34 s).
+  - A Nova 2 Lite call from Tokyo (the rerank region) also succeeded, so Tokyo's account verification has cleared.
+- Auth option used: A (long-term Bedrock API key; the key itself is never printed or logged). The IAM ARNs in SPEC section 2.3 were not exercised, because API-key mode uses the default policy AWS attaches. They only matter for Option B.
+
 ## Out of scope / follow-ups
-- **The live acceptance criterion is still pending.** It needs Goutham's Bedrock API key in `.env`. When that is done, run the live test and add its printed line here. That run is the first proof that the account can call Nova 2 Lite from Tokyo, and it confirms the IAM ARNs in SPEC section 2.3. If it fails with an access error, stop and report the exact error.
 - Console steps (budget alarm with "Credits" excluded): not done yet, per Goutham.
 - The Nova Pro `apac.` price is assumed equal to the Tokyo list price. Check it against the first bill.
 
