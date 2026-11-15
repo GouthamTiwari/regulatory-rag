@@ -14,3 +14,6 @@ data/raw/
 
 # Build metadata created when the package is installed
 *.egg-info/
+
+# Local agent worktrees (never part of the repo)
+.claude/worktrees/
