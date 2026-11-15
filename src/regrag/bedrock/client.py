@@ -54,11 +54,16 @@ def auth_mode(settings: Settings) -> AuthMode:
     )
 
 
-def get_runtime_client(settings: Settings | None = None):
-    """A cached `bedrock-runtime` client for the configured region and auth option."""
+def get_runtime_client(settings: Settings | None = None, *, region: str | None = None):
+    """A cached `bedrock-runtime` client for one region (default: settings.aws_region).
+
+    The reranker passes `region=settings.bedrock_rerank_region`, because Mumbai has no
+    Bedrock reranker. A long-term Bedrock API key works in every region, so one key serves both.
+    """
     settings = settings or get_settings()
+    region = region or settings.aws_region
     mode = auth_mode(settings)
-    cache_key = (settings.aws_region, mode)
+    cache_key = (region, mode)
     if cache_key in _clients:
         return _clients[cache_key]
 
@@ -66,9 +71,7 @@ def get_runtime_client(settings: Settings | None = None):
         # boto3 reads the API key only from the process environment, so make sure the
         # value from Settings is the one there.
         os.environ[BEARER_ENV_VAR] = settings.aws_bearer_token_bedrock.get_secret_value().strip()
-        client = boto3.client(
-            "bedrock-runtime", region_name=settings.aws_region, config=_CLIENT_CONFIG
-        )
+        client = boto3.client("bedrock-runtime", region_name=region, config=_CLIENT_CONFIG)
     else:
         # Why remove it: botocore treats an *empty* AWS_BEARER_TOKEN_BEDROCK (which an
         # unfilled .env line creates) as "a token exists" and would send an empty key.
@@ -76,7 +79,7 @@ def get_runtime_client(settings: Settings | None = None):
             os.environ.pop(BEARER_ENV_VAR, None)
         client = boto3.client(
             "bedrock-runtime",
-            region_name=settings.aws_region,
+            region_name=region,
             aws_access_key_id=settings.aws_access_key_id.get_secret_value().strip(),
             aws_secret_access_key=settings.aws_secret_access_key.get_secret_value().strip(),
             config=_CLIENT_CONFIG,

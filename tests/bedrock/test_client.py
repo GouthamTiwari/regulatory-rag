@@ -26,6 +26,14 @@ def isolated(monkeypatch):
     # even though get_runtime_client() writes os.environ itself.
     monkeypatch.setenv(BEARER_ENV_VAR, "placeholder")
     monkeypatch.delenv(BEARER_ENV_VAR)
+    # A developer's .env may set these; tests must see the code defaults.
+    for name in (
+        "AWS_REGION",
+        "BEDROCK_RERANK_REGION",
+        "AWS_ACCESS_KEY_ID",
+        "AWS_SECRET_ACCESS_KEY",
+    ):
+        monkeypatch.delenv(name, raising=False)
     clear_client_cache()
     calls = []
 
@@ -96,6 +104,14 @@ def test_client_is_cached_per_region_and_mode(isolated):
     assert len(isolated) == 1
     get_runtime_client(Settings(aws_bearer_token_bedrock=FAKE_TOKEN, aws_region="us-east-1"))
     assert len(isolated) == 2
+
+
+def test_region_override_for_the_reranker(isolated):
+    s = Settings(aws_bearer_token_bedrock=FAKE_TOKEN)
+    main = get_runtime_client(s)
+    rerank = get_runtime_client(s, region=s.bedrock_rerank_region)
+    assert main is not rerank
+    assert [kw["region_name"] for _, kw in isolated] == ["ap-south-1", "ap-northeast-1"]
 
 
 def test_adaptive_retries_are_configured(isolated):

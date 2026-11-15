@@ -94,6 +94,8 @@ Model facts that affect our code **[verified on the model card]**:
 
 ### 2.2 Region
 
+> **Region change, 2026-11-16 (decision 8).** Main region is now **`ap-south-1` (Mumbai)** for embeddings and LLM calls. Only the reranker is called in **`ap-northeast-1` (Tokyo)**, set by `BEDROCK_RERANK_REGION`, because no Indian region offers a Bedrock reranker. *Why:* Tokyo returned "AccessDeniedException: Your account is currently being verified" in both of Goutham's AWS accounts, while Mumbai worked in the console playground. Mumbai is also the closest region. One long-term Bedrock API key works in both regions (only short-term keys are tied to one region: https://docs.aws.amazon.com/bedrock/latest/userguide/api-keys.html). Until Tokyo's verification clears, only the `hybrid_rerank` configuration is blocked. The text and table below are the original Tokyo analysis, kept for the record.
+
 | Region | Titan V2 | Cohere Rerank 3.5 | Amazon Rerank 1.0 | Haiku 5.5 | All three? |
 |---|---|---|---|---|---|
 | ap-south-1 (Mumbai) | yes | **no** | **no** | `global.` only | **No** |
@@ -171,18 +173,17 @@ Rules for the code:
 
 ### 2.4 Prices (on-demand, USD) for cost logging
 
-| Model | Price (Tokyo, ap-northeast-1) | Status |
+| Model | Price (region it is called in) | Status |
 |---|---|---|
-| Titan Text Embeddings V2 | $0.029 per 1M input tokens ($0.000029 per 1K) | **[verified]** AWS Price List API, Tokyo, 2026-11-16 |
-| Amazon Rerank 1.0 | $1.00 per 1,000 search units ($0.001 per unit). A search unit is one query of up to 100 documents **[definition to verify in Task 11]** | **[verified price]** AWS Price List API, Tokyo |
-| Nova 2 Lite, `global.` profile | $0.36 per 1M input, $3.01 per 1M output | **[verified]** AWS Price List API, Tokyo (`cross-region-global` rate) |
-| Nova 2 Lite, `jp.` / in-region rate | $0.396 per 1M input, $3.311 per 1M output | **[verified]** same source |
-| Nova Pro | $0.96 per 1M input, $3.84 per 1M output | **[verified]** AWS Price List API, Tokyo (rate for the `apac.` profile assumed equal; Task 04 checks the bill) |
+| Titan Text Embeddings V2 (Mumbai) | $0.024 per 1M input tokens | **[verified]** AWS Price List API, ap-south-1, 2026-11-16 |
+| Amazon Rerank 1.0 (Tokyo) | $1.00 per 1,000 search units ($0.001 per unit). A search unit is one query of up to 100 documents **[definition to verify in Task 11]** | **[verified price]** AWS Price List API, Tokyo |
+| Nova 2 Lite, `global.` profile (Mumbai) | $0.35 per 1M input, $2.95 per 1M output | **[verified]** AWS Price List API, ap-south-1 (`cross-region-global` rate) |
+| Nova Pro (Mumbai) | $0.94 per 1M input, $3.76 per 1M output | **[verified]** AWS Price List API, ap-south-1 (rate for the `apac.` profile assumed equal; check the first bill) |
 | *Upgrade path:* Cohere Rerank 3.5 | $2.00 per 1,000 queries | **[verified]** https://aws.amazon.com/bedrock/pricing/ |
 | *Upgrade path:* Claude Haiku 5.5, `global.` | $0.10 per 1M input, $0.50 per 1M output | **[verified]** https://platform.claude.com/docs/en/about-claude/pricing |
 | *Upgrade path:* Claude Sonnet 5.5, `global.` | $2 per 1M input, $10 per 1M output | **[verified]** same source |
 
-Price source for the Amazon rows: `https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonBedrock/current/ap-northeast-1/index.json` (the public AWS Price List). *Why that file:* the pricing web page renders its tables with JavaScript and could not be read.
+Price source for the Amazon rows: the public AWS Price List files, `https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonBedrock/current/<region>/index.json` for `ap-south-1` and `ap-northeast-1`. *Why that file:* the pricing web page renders its tables with JavaScript and could not be read.
 
 Prices live in one file, `src/regrag/bedrock/pricing.py`, as a dictionary keyed by model ID, with a `PRICES_CHECKED_ON` date. *Why:* prices change; one place to update, and the log can say how old the numbers are.
 
@@ -542,12 +543,13 @@ Rule for builders: pipeline stages receive their collaborators as arguments (dep
 
 ## 11. Decisions (approved 2026-11-16)
 
-1. **Region: `ap-northeast-1` (Tokyo); fallback `us-east-1`.** *Why:* Mumbai has no reranker, and Tokyo is the nearest region where embeddings, reranker and Claude all work on-demand.
+1. **Region (amended by decision 8): originally `ap-northeast-1` (Tokyo); fallback `us-east-1`.** *Why:* Mumbai has no reranker, and Tokyo is the nearest region where embeddings, reranker and Claude all work on-demand.
 2. **GST source: `gstcouncil.gov.in` is the official source for v1. Circulars 251 and above stay out of v1.** *Why:* it is a government site that lists the CBIC circulars with PDFs, while `cbic-gst.gov.in` no longer does; the newer circulars could not be confirmed on any official page, and we do not invent URLs.
 3. **AWS account: $100 of promotional credits; Bedrock access not yet confirmed.** Check in Billing → Credits whether the credits cover Claude and Cohere (Marketplace-billed), and create the budget alarm with "Credits" excluded (section 2.3). Task 04's live test confirms access. *Why:* credits may not cover Marketplace models, and a budget that counts credits stays at $0 and never warns.
 4. **Faithfulness judge (amended by decision 7): Nova 2 Lite for development runs, Nova Pro (`apac.amazon.nova-pro-v1:0`) for the final reported run in Task 28, about $2.50.** Originally Claude Haiku / Sonnet 5.5. *Why:* a stronger, different model is a fairer judge of Haiku's answers, but it is 20 times the price, so we pay for it once.
 5. **Keyword leg: Postgres full-text search is accepted as the "BM25" leg.** Config name stays `bm25`; results and README label it "keyword (Postgres FTS, BM25-like)". *Why:* it needs no extra software, and the honest label avoids claiming an algorithm we do not run.
 6. **Golden set: target about 120 reviewed questions; fallback 60 if review time runs short** (mix in section 6.2). *Why:* 120 gives steadier numbers, but 60 well-reviewed questions are worth more than 120 unchecked ones.
 7. **Models: Amazon first-party only for v1 (approved 2026-11-16).** Titan V2 embeddings, Amazon Rerank 1.0, Nova 2 Lite (`global.amazon.nova-2-lite-v1:0`) as the LLM, Nova Pro as the final judge. Region stays Tokyo, the only nearby region with Amazon Rerank. *Why:* AWS Support confirmed that the AISPL account cannot subscribe to Marketplace models (Claude, Cohere) by card. Amazon models need no Marketplace step and are covered by the account's credits. Claude and Cohere remain a one-line `.env` upgrade after a switch to Pay By Invoice, which the Protocols from Task 02 make possible without code changes.
+8. **Regions: `ap-south-1` (Mumbai) for embeddings and LLMs, `ap-northeast-1` (Tokyo) for the reranker only (approved 2026-11-16).** *Why:* Tokyo was under an AWS account-verification hold in both accounts while Mumbai worked; Mumbai is closest to Hyderabad; no Indian region has a Bedrock reranker. The client keeps one cached connection per region, and one long-term API key serves both.
 
 Still to confirm during the build (not blocking): the items marked **[to verify]** in sections 2.3, 2.4 and 5. Each names the task that checks it.

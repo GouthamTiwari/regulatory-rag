@@ -1,15 +1,17 @@
 """On-demand prices for every model we may call, and per-call cost (SPEC section 2.4).
 
-All prices are USD for ap-northeast-1 (Tokyo). The Amazon rows come from the public AWS
-Price List file for Tokyo; the upgrade-path rows (Claude, Cohere) come from the Anthropic
-and AWS pricing pages. Prices change: update this table and PRICES_CHECKED_ON together.
+All prices are USD. Each model is priced for the region we call it in: embeddings and LLMs
+in ap-south-1 (Mumbai), rerankers in ap-northeast-1 (Tokyo). The Amazon rows come from the
+public AWS Price List files for those regions; the upgrade-path rows (Claude, Cohere) come
+from the Anthropic and AWS pricing pages. Prices change: update this table and
+PRICES_CHECKED_ON together.
 """
 
 from dataclasses import dataclass
 from datetime import date
 
 PRICES_CHECKED_ON = date(2026, 11, 16)
-PRICE_REGION = "ap-northeast-1"
+PRICE_REGIONS = {"llm_and_embeddings": "ap-south-1", "rerank": "ap-northeast-1"}
 
 
 @dataclass(frozen=True)
@@ -23,12 +25,12 @@ class ModelPrice:
 
 PRICES: dict[str, ModelPrice] = {
     # --- v1 defaults: Amazon first-party models -------------------------------------------
-    "amazon.titan-embed-text-v2:0": ModelPrice(input_per_1m=0.029),
-    "amazon.rerank-v1:0": ModelPrice(per_1k_rerank_units=1.00),
-    "global.amazon.nova-2-lite-v1:0": ModelPrice(input_per_1m=0.36, output_per_1m=3.01),
-    "jp.amazon.nova-2-lite-v1:0": ModelPrice(input_per_1m=0.396, output_per_1m=3.311),
-    # Tokyo list price; assumed equal for the apac. profile (to confirm on the first bill).
-    "apac.amazon.nova-pro-v1:0": ModelPrice(input_per_1m=0.96, output_per_1m=3.84),
+    "amazon.titan-embed-text-v2:0": ModelPrice(input_per_1m=0.024),  # Mumbai
+    "amazon.rerank-v1:0": ModelPrice(per_1k_rerank_units=1.00),  # Tokyo
+    # Mumbai, cross-region-global rate.
+    "global.amazon.nova-2-lite-v1:0": ModelPrice(input_per_1m=0.35, output_per_1m=2.95),
+    # Mumbai list price; assumed equal for the apac. profile (to confirm on the first bill).
+    "apac.amazon.nova-pro-v1:0": ModelPrice(input_per_1m=0.94, output_per_1m=3.76),
     # --- Upgrade path (needs AWS Marketplace, i.e. Pay By Invoice on an AISPL account) ----
     "cohere.rerank-v3-5:0": ModelPrice(per_1k_rerank_units=2.00),
     # Haiku costs 5x more for prompts over 100K tokens; our prompts stay far below that.

@@ -18,7 +18,7 @@ load_dotenv()
 
 # v1 uses Amazon first-party models only: this AISPL (India) account can't subscribe to the
 # AWS Marketplace models (Claude, Cohere) by card (SPEC decision 7). Nova 2 Lite has no
-# in-region option in Tokyo, so it goes through the global inference profile, which is
+# in-region option in Mumbai, so it goes through the global inference profile, which is
 # also the cheapest prefix (SPEC 2.1).
 NOVA_LITE_PROFILE_ID = "global.amazon.nova-2-lite-v1:0"
 # Stronger model for the final reported judge run. It has no `global.` profile; `apac.` works.
@@ -31,8 +31,10 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(extra="ignore", env_ignore_empty=True)
 
     # --- AWS region and auth (SPEC 2.2, 2.3) -------------------------------------------
-    # Tokyo is the nearest region to India with Titan V2, a reranker and Haiku 5.5.
-    aws_region: str = "ap-northeast-1"
+    # Mumbai: closest to India, and it has Titan V2 plus Nova through inference profiles.
+    aws_region: str = "ap-south-1"
+    # Mumbai has no Bedrock reranker, so rerank calls alone go to Tokyo (SPEC decision 8).
+    bedrock_rerank_region: str = "ap-northeast-1"
     # Option A, recommended: a Bedrock-only API key that expires on its own.
     aws_bearer_token_bedrock: SecretStr = SecretStr("")
     # Option B: IAM user access keys. Set only one option.
@@ -42,7 +44,7 @@ class Settings(BaseSettings):
     # --- Bedrock model IDs (SPEC 2.1) ---------------------------------------------------
     # 1024-dim embeddings, in-region, $0.02 per 1M tokens.
     bedrock_embed_model_id: str = "amazon.titan-embed-text-v2:0"
-    # Amazon's own reranker (Tokyo has it; Mumbai doesn't). Called via InvokeModel because
+    # Amazon's own reranker, called in bedrock_rerank_region. Called via InvokeModel because
     # Bedrock API keys can't use the agent-runtime Rerank API. Upgrade: cohere.rerank-v3-5:0.
     bedrock_rerank_model_id: str = "amazon.rerank-v1:0"
     # Router and answer model: cheap and fast enough to call twice per question.

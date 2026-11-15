@@ -16,6 +16,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 # machine cannot change the results (or leak a real key into test output).
 ENV_VARS = [
     "AWS_REGION",
+    "BEDROCK_RERANK_REGION",
     "AWS_BEARER_TOKEN_BEDROCK",
     "AWS_ACCESS_KEY_ID",
     "AWS_SECRET_ACCESS_KEY",
@@ -55,7 +56,8 @@ def test_import_without_env_file_does_not_crash(tmp_path):
 
 def test_defaults_without_env(clean_env):
     s = Settings()
-    assert s.aws_region == "ap-northeast-1"
+    assert s.aws_region == "ap-south-1"
+    assert s.bedrock_rerank_region == "ap-northeast-1"  # Mumbai has no Bedrock reranker
     assert s.aws_bearer_token_bedrock.get_secret_value() == ""
     assert s.aws_secret_access_key.get_secret_value() == ""
     assert s.bedrock_llm_model_id == NOVA_LITE_PROFILE_ID
@@ -69,7 +71,7 @@ def test_empty_values_fall_back_to_defaults(clean_env):
     clean_env.setenv("POSTGRES_PORT", "")
     s = Settings()
     assert s.bedrock_judge_model_id == NOVA_LITE_PROFILE_ID
-    assert s.aws_region == "ap-northeast-1"
+    assert s.aws_region == "ap-south-1"
     assert s.postgres_port == 5433
 
 

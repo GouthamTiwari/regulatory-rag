@@ -14,6 +14,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 # Every variable Task 01 promises in .env.example. Later code reads these names.
 EXPECTED_ENV_VARS = [
     "AWS_REGION",
+    "BEDROCK_RERANK_REGION",
     "AWS_BEARER_TOKEN_BEDROCK",
     "AWS_ACCESS_KEY_ID",
     "AWS_SECRET_ACCESS_KEY",
