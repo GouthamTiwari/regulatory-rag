@@ -7,3 +7,10 @@ __pycache__/
 
 # Raw PDFs stay local; data/manifest.csv lets anyone re-download them
 data/raw/
+
+# Tool caches (recreated automatically by pytest and ruff)
+.pytest_cache/
+.ruff_cache/
+
+# Build metadata created when the package is installed
+*.egg-info/
