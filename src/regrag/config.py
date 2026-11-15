@@ -120,9 +120,11 @@ class Settings(BaseSettings):
         if self.database_url.get_secret_value():
             return self.database_url.get_secret_value()
         password = self.postgres_password.get_secret_value()
+        # 127.0.0.1, not "localhost": on Windows, localhost tries IPv6 (::1) first, and the
+        # container listens on IPv4 only, so every connection waited 5 s for a timeout.
         return (
             f"postgresql://{self.postgres_user}:{password}"
-            f"@localhost:{self.postgres_port}/{self.postgres_db}"
+            f"@127.0.0.1:{self.postgres_port}/{self.postgres_db}"
         )
 
 

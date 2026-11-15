@@ -1,0 +1,28 @@
+# Local Postgres 17 + pgvector for regrag. Start with: docker compose up -d
+# Credentials come from .env (gitignored). Nothing secret is written in this file.
+services:
+  db:
+    image: pgvector/pgvector:pg17
+    container_name: regrag-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-regrag}
+      # Required: compose refuses to start with a clear message if .env doesn't set it.
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env (copy .env.example)}
+      POSTGRES_DB: ${POSTGRES_DB:-regrag}
+    ports:
+      # 127.0.0.1 only: the database is reachable from this PC, not from the local network.
+      # 5433 on the host avoids clashing with any Postgres already using 5432.
+      - "127.0.0.1:${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      # A named volume keeps the data when the container is recreated.
+      - regrag-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      # $$ escapes $ so the variables are read inside the container, not by compose.
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+volumes:
+  regrag-pgdata:

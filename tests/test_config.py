@@ -95,7 +95,7 @@ def test_secrets_are_masked_in_repr_and_str(clean_env):
 
 def test_database_dsn_built_from_parts(clean_env):
     s = Settings(postgres_password="pw", postgres_port=5433)
-    assert s.database_dsn() == "postgresql://regrag:pw@localhost:5433/regrag"
+    assert s.database_dsn() == "postgresql://regrag:pw@127.0.0.1:5433/regrag"
 
 
 def test_database_url_wins_when_set(clean_env):
