@@ -60,22 +60,22 @@ Every stage sits behind a small interface (`Retriever`, `Reranker`, `Router`, `G
 
 ## Evaluation results
 
-The four configurations differ **only** in retrieval and reranking; routing, generation and validation are identical, so differences come from retrieval.
+61 golden questions (38 factual, 4 table, 5 cross-corpus, 7 superseded, 7 should-refuse; 33 with section-level gold) × 4 configurations. Generator Nova 2 Lite, faithfulness judge **Nova Pro**. 0 errors, run cost **$0.94**. The configurations differ **only** in retrieval and reranking. Full output: [`docs/eval/results.md`](docs/eval/results.md); analysis: [`docs/eval/tuning-notes.md`](docs/eval/tuning-notes.md).
 
-> **Sample, not final.** 20 seed questions, not yet human-reviewed; judge = Nova 2 Lite. The final table (≈60 reviewed questions, Nova Pro as judge) replaces this. Full output: [`docs/eval/results.md`](docs/eval/results.md).
+| Configuration | Recall@5 | Recall@10 | MRR | Citation accuracy | Faithfulness | Abstention accuracy | p95 latency |
+|---|---|---|---|---|---|---|---|
+| keyword (Postgres FTS, BM25-like) | 0.74 | 0.81 | 0.62 | 0.93 | 0.97 | 0.70 | 3.6 s |
+| vector (Titan V2 + pgvector) | 0.94 | 0.96 | 0.83 | 0.97 | 0.97 | 0.92 | 6.4 s |
+| hybrid (keyword + vector, RRF) | 0.89 | 0.94 | 0.81 | 0.96 | 0.96 | 0.87 | 6.4 s |
+| **hybrid + rerank (Amazon Rerank 1.0)** | **0.98** | **0.98** | **0.93** | **0.97** | 0.96 | 0.90 | 32.4 s |
 
-| Configuration | Recall@5 | MRR | Citation accuracy | Faithfulness | Abstention accuracy | p95 latency |
-|---|---|---|---|---|---|---|
-| keyword (Postgres FTS, BM25-like) | 0.94 | 0.86 | 0.91 | 0.90 | 0.65 | 3.7 s |
-| vector (Titan V2 + pgvector) | 1.00 | 1.00 | 0.96 | 0.96 | 1.00 | 6.1 s |
-| hybrid (keyword + vector, RRF) | 1.00 | 1.00 | 0.95 | 0.94 | 0.80 | 5.2 s |
-| hybrid + rerank (Amazon Rerank 1.0) | 1.00 | 1.00 | 0.94 | 0.93 | 0.95 | 38.5 s |
+Citation validity was 1.00 for every configuration (enforced by the validator). Every should-refuse question was refused in every configuration (abstention recall 1.00), and every superseded-rule answer carried a supersession note.
 
-Citation validity was 1.00 for every configuration (enforced by the validator). Run cost: $0.26 for 80 answers plus judging.
+**Reading.** Reranking gives the best retrieval (MRR 0.93 vs 0.83 for vector alone). Hybrid search *without* a reranker was slightly worse than vector alone here: keyword search pulls in partly matching passages that the reranker then filters out. The remaining errors are mostly **wrong refusals** on cross-corpus questions. Latency for the reranked setup is almost all waiting for the account's 2-requests-per-minute rerank quota.
 
-**Reading.** Finding the right *document* among 65 is easy for every configuration, because the seed questions only specify expected documents. The configurations differ in **wrong refusals**: keyword search often hands the model the right document but the wrong paragraph, and the model then correctly says the evidence is insufficient. On this small, unreviewed set, vector search alone matches hybrid + rerank. The reranker's latency comes from the account's 2-requests-per-minute quota, not the model. The final evaluation adds section-level expected answers so that retrieval quality itself is measured.
+> **About the golden set:** the questions were drafted from real passages by the LLM, plus 8 written by hand. They were **reviewed by an AI assistant**, not a human: answers checked for support in the source passage, near-duplicates removed, 2 of 63 dropped. Each row is tagged `assistant-reviewed` in [`data/golden/golden.jsonl`](data/golden/golden.jsonl). A human review pass is the next step.
 
-Metric definitions: [SPEC section 6.3](docs/SPEC.md). Calibration of the abstain threshold (all 17 answerable seed questions had the expected document ranked #1 after reranking; out-of-corpus questions scored ~100× lower): [Task 22 changelog](docs/changelogs/22-query-pipeline.md).
+Calibration of the abstain threshold (out-of-corpus questions scored about 100× lower than answerable ones): [Task 22 changelog](docs/changelogs/22-query-pipeline.md).
 
 ## Setup (Windows PowerShell)
 
@@ -115,7 +115,7 @@ uv run python -m regrag.query "Can a car dealer claim input tax credit on demo v
 uv run python -m regrag.query "..." --config hybrid       # bm25 | vector | hybrid | hybrid_rerank
 uv run python -m regrag.query "..." --json                # full result: citations, usage, latency
 uv run python -m regrag.eval --include-unreviewed --sample  # 4-way evaluation → docs/eval/
-uv run pytest                                            # 326 unit tests, no AWS or Docker needed
+uv run pytest                                            # 335 unit tests, no AWS or Docker needed
 ```
 
 ## Design decisions
@@ -132,7 +132,7 @@ uv run pytest                                            # 326 unit tests, no AW
 
 ## Cost
 
-Embedding the whole corpus: **$0.016**. One answered question: **~$0.002–0.005** (Nova 2 Lite + one rerank). The sample 4-way evaluation: under $0.40. Prices and the date they were checked: [`src/regrag/bedrock/pricing.py`](src/regrag/bedrock/pricing.py).
+Embedding the whole corpus: **$0.016**. One answered question: **~$0.002–0.005** (Nova 2 Lite + one rerank). The full 4-way evaluation (61 questions × 4 configurations, Nova Pro judge): $0.94. Prices and the date they were checked: [`src/regrag/bedrock/pricing.py`](src/regrag/bedrock/pricing.py).
 
 ## Project layout
 
