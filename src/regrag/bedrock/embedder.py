@@ -1,6 +1,7 @@
 """Amazon Titan Text Embeddings V2 (SPEC section 5, "Embed")."""
 
 import json
+import threading
 import time
 import warnings
 from collections.abc import Callable
@@ -14,11 +15,36 @@ from regrag.types import EmbedResult
 MAX_INPUT_CHARS = 7_500 * 4
 
 
+class _Pacer:
+    """Spaces calls evenly at no more than `per_second` calls per second, across threads.
+
+    Why: on a new account, Titan throttles short bursts of real-sized texts but accepts a
+    steady 1 call per second (~300-token texts) with no errors at all (measured
+    2026-11-16). Pacing avoids the throttling; retrying alone could not.
+    """
+
+    def __init__(self, per_second: float, sleep: Callable[[float], None]):
+        self.interval = 1.0 / per_second if per_second > 0 else 0.0
+        self.sleep = sleep
+        self.lock = threading.Lock()
+        self.next_slot = 0.0
+
+    def wait(self) -> None:
+        if not self.interval:
+            return
+        with self.lock:
+            now = time.monotonic()
+            slot = max(now, self.next_slot)
+            self.next_slot = slot + self.interval
+        if slot > now:
+            self.sleep(slot - now)
+
+
 class TitanEmbedder:
     """Implements the Embedder protocol.
 
-    Titan takes one text per call, so texts are sent in parallel (a few at a time, to stay
-    under the account's request quota) and the results are put back in input order.
+    Titan takes one text per call, so texts are sent in parallel (a few at a time) but
+    paced to a steady rate, and the results are put back in input order.
     """
 
     def __init__(
@@ -28,6 +54,7 @@ class TitanEmbedder:
         model_id: str = "amazon.titan-embed-text-v2:0",
         dimensions: int = 1024,
         concurrency: int = 4,
+        requests_per_second: float = 0.0,  # 0 = no pacing (tests, fakes)
         sleep: Callable[[float], None] = time.sleep,
     ):
         # The client is passed in (never created here) so tests can hand in a fake.
@@ -36,6 +63,7 @@ class TitanEmbedder:
         self.dimensions = dimensions
         self.concurrency = concurrency
         self.sleep = sleep
+        self.pacer = _Pacer(requests_per_second, sleep)
 
     @classmethod
     def from_settings(cls, client, settings: Settings) -> "TitanEmbedder":
@@ -44,6 +72,7 @@ class TitanEmbedder:
             model_id=settings.bedrock_embed_model_id,
             dimensions=settings.embed_dimensions,
             concurrency=settings.embed_concurrency,
+            requests_per_second=settings.embed_requests_per_second,
         )
 
     def _embed_one(self, text: str) -> tuple[list[float], int]:
@@ -53,6 +82,9 @@ class TitanEmbedder:
         body = json.dumps({"inputText": text, "dimensions": self.dimensions, "normalize": True})
 
         def call():
+            # Every attempt, retries included, waits for its slot: an unpaced retry is
+            # itself a burst, and bursts are what get throttled.
+            self.pacer.wait()
             return self.client.invoke_model(
                 modelId=self.model_id,
                 body=body,

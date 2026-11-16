@@ -234,3 +234,23 @@ def insert_query_log(conn: psycopg.Connection, result: QueryResult) -> None:
             result.usage.rerank_queries, result.cost_usd, json.dumps(result.model_ids),
         ),
     )  # fmt: skip
+
+
+def resolve_relation_targets(conn: psycopg.Connection) -> int:
+    """Fill to_doc_id for links whose target document was stored after the link itself.
+    Returns the number of links resolved."""
+    index = _ref_index(conn)
+    rows = conn.execute(
+        "SELECT relation_id, to_doc_ref FROM document_relations WHERE to_doc_id IS NULL"
+    ).fetchall()
+    resolved = 0
+    with conn.cursor() as cur:
+        for relation_id, ref in rows:
+            doc_id = index.get(normalise_ref(ref))
+            if doc_id:
+                cur.execute(
+                    "UPDATE document_relations SET to_doc_id = %s WHERE relation_id = %s",
+                    (doc_id, relation_id),
+                )
+                resolved += 1
+    return resolved

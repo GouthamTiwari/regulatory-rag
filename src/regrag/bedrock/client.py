@@ -12,10 +12,12 @@ AuthMode = Literal["api_key", "iam"]
 
 BEARER_ENV_VAR = "AWS_BEARER_TOKEN_BEDROCK"
 
-# Adaptive retries back off automatically when Bedrock throttles us (HTTP 429), which
-# happens easily on a new account's default quotas.
+# "standard" retries: exponential backoff with jitter when Bedrock throttles us (HTTP 429),
+# which a new account's low default quotas trigger after a short burst. Not "adaptive":
+# its client-side rate limiter reacted to throttling by slowing our own sending to a near
+# halt, which froze a 2,265-call ingest (found 2026-11-16; see Task 14 changelog).
 _CLIENT_CONFIG = Config(
-    retries={"max_attempts": 6, "mode": "adaptive"},
+    retries={"max_attempts": 8, "mode": "standard"},
     connect_timeout=10,
     read_timeout=120,  # an LLM answer can take a while; embeddings and rerank are fast
 )

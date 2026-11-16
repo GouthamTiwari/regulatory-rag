@@ -93,6 +93,9 @@ class Settings(BaseSettings):
     embed_dimensions: int = 1024
     # Titan takes one text per call, so a few calls in parallel; more would hit throttling.
     embed_concurrency: int = Field(default=4, gt=0)
+    # A new account's Titan quota throttles bursts but accepts a steady 1 call/second of
+    # real ~300-token chunks (measured 2026-11-16). Raise it once AWS grants a higher quota.
+    embed_requests_per_second: float = Field(default=1.0, ge=0)
 
     # --- Retrieval and fusion (SPEC 5) ------------------------------------------------------
     # 30 per leg gives the reranker enough candidates while costing one billed rerank query.

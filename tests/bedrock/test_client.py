@@ -114,7 +114,8 @@ def test_region_override_for_the_reranker(isolated):
     assert [kw["region_name"] for _, kw in isolated] == ["ap-south-1", "ap-northeast-1"]
 
 
-def test_adaptive_retries_are_configured(isolated):
+def test_standard_retries_are_configured(isolated):
+    # Not "adaptive": its client-side limiter froze the ingest under throttling.
     get_runtime_client(Settings(aws_bearer_token_bedrock=FAKE_TOKEN))
     config = isolated[0][1]["config"]
-    assert config.retries["mode"] == "adaptive"
+    assert config.retries["mode"] == "standard"

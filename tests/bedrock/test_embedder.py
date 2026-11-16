@@ -108,3 +108,15 @@ def test_live_two_sentences_give_two_unit_vectors():
     for vector in result.vectors:
         assert math.isclose(math.sqrt(sum(x * x for x in vector)), 1.0, rel_tol=1e-3)
     print(f"\nregion={settings.aws_region} tokens={result.input_tokens} latency={seconds:.2f}s")
+
+
+def test_pacer_spaces_calls_evenly_across_threads():
+    waits: list[float] = []
+    embedder = TitanEmbedder(
+        FakeBedrock(), dimensions=8, concurrency=4, requests_per_second=10.0, sleep=waits.append
+    )
+    embedder.embed([f"text {i}" for i in range(5)])
+    # Slots are 0.1 s apart. With a recording (non-blocking) sleep, the 2nd..5th callers
+    # are told to wait about 0.1, 0.2, 0.3 and 0.4 s.
+    assert len(waits) == 4
+    assert sorted(round(w, 1) for w in waits) == [0.1, 0.2, 0.3, 0.4]
