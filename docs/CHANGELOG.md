@@ -23,3 +23,4 @@ One line per merged task: date | task | summary.
 - 2026-11-16 | 13 repository | transactional document/chunk upsert, relations (both directions, ref -> doc_id), nearest chunk, query logs; fixed db test isolation
 - 2026-11-16 | 14 ingest-pipeline | end-to-end ingest (one transaction per document, skip unchanged, dry-run cost); paced Titan calls at 1/s after diagnosing burst throttling
 - 2026-11-16 | 15 keyword-retriever | websearch_to_tsquery + ts_rank_cd with route filter and any-word fallback; db fixtures shared project-wide
+- 2026-11-16 | 16 vector-retriever | cosine HNSW search with ef_search + iterative scan so route filters still fill top_k
