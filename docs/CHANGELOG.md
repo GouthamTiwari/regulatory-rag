@@ -10,3 +10,4 @@ One line per merged task: date | task | summary.
 - 2026-11-16 | spec decision 8 | main region ap-south-1 (Mumbai); reranker only in ap-northeast-1 (Tokyo) via BEDROCK_RERANK_REGION; Mumbai prices; per-region cached clients
 - 2026-11-16 | 05 manifest | 65 documents (25 RBI, 40 GST) copied from official pages, all GST PDFs checked; 7 evidence-backed relations; validator + --check
 - 2026-11-16 | 06 downloader | polite httpx downloader (retries, %PDF check, sha256, atomic writes); RBI host shows a CAPTCHA, so it stops and imports hand-saved PDFs via --from-folder
+- 2026-11-16 | 07 pdf-parser | pdfplumber parser: Markdown tables with in-text placeholders, header/footer/page-number/ToC cleanup, scanned-page flag; all 65 PDFs parse (1,210 pages, 251 tables)
