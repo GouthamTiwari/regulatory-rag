@@ -31,11 +31,12 @@ def apply_supersession(
     chunks: list[RetrievedChunk],
     documents: dict[str, dict],
     relations: list[Relation],
-    fetch_replacement: Callable[[str], RetrievedChunk | None],
+    fetch_replacement: Callable[[str, RetrievedChunk], list[RetrievedChunk]],
 ) -> tuple[list[RetrievedChunk], list[str]]:
     """Return (chunks to show, notes). `documents` maps doc_id to at least
-    {"status", "reference_no", "title"}; `fetch_replacement(doc_id)` returns that
-    document's chunk closest to the question, or None."""
+    {"status", "reference_no", "title"}; `fetch_replacement(newer_doc_id, old_chunk)`
+    returns the newer document's chunks covering the same rule as `old_chunk` (best
+    first), or an empty list."""
     reviewed = [r for r in relations if r.reviewed]
     out: list[RetrievedChunk] = []
     notes: list[str] = []
@@ -61,10 +62,10 @@ def apply_supersession(
                 new_name = _name(newer.from_doc_id, documents)
                 out.append(replace(chunk, supersession_mark=f"SUPERSEDED BY {new_name}"))
                 note(f"{old_name} was {status} by {new_name}; the current rule is in {new_name}.")
-                replacement = fetch_replacement(newer.from_doc_id)
-                if replacement is not None and replacement.chunk_id not in present:
-                    out.append(replacement)
-                    present.add(replacement.chunk_id)
+                for replacement in fetch_replacement(newer.from_doc_id, chunk):
+                    if replacement.chunk_id not in present:
+                        out.append(replacement)
+                        present.add(replacement.chunk_id)
             else:
                 out.append(replace(chunk, supersession_mark=status.upper()))
                 note(f"{old_name} is marked {status}; check for a newer document.")

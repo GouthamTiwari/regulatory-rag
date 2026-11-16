@@ -166,3 +166,13 @@ def test_query_log_round_trips(db_conn):
     assert row[2][0]["doc_id"] == "gst-231-25-2024"
     assert row[3] == {"retrieve": 40.0}
     assert float(row[4]) == pytest.approx(0.0012) and row[5] == 1
+
+
+def test_chunks_like_finds_the_same_rule_in_another_document(db_conn):
+    save(db_conn, manifest_row("rbi-11959", "RBI/OLD/1"), chunks_for("rbi-11959", 1, seed=5.0))
+    save(db_conn, manifest_row("rbi-12799", "RBI/NEW/1"), chunks_for("rbi-12799", 4, seed=2.0))
+    old_id = db_conn.execute("SELECT chunk_id FROM chunks WHERE doc_id = 'rbi-11959'").fetchone()[0]
+    like = repo.chunks_like(db_conn, "rbi-12799", old_id, limit=2)
+    # Vectors are [seed+i, 0, ..., 1]; the old one is [5, ..., 1], so the closest new
+    # chunks are i=3 (seed 5) and i=2 (seed 4).
+    assert [c.content for c in like] == ["content 3", "content 2"]

@@ -23,9 +23,15 @@ class _Pacer:
     2026-11-16). Pacing avoids the throttling; retrying alone could not.
     """
 
-    def __init__(self, per_second: float, sleep: Callable[[float], None]):
-        self.interval = 1.0 / per_second if per_second > 0 else 0.0
+    def __init__(
+        self,
+        per_second: float,
+        sleep: Callable[[float], None],
+        clock: Callable[[], float] = time.monotonic,
+    ):
+        self.interval = 1.0 / per_second if per_second > 0 else 0.0  # seconds between calls
         self.sleep = sleep
+        self.clock = clock  # injectable so tests are exact, not timing-dependent
         self.lock = threading.Lock()
         self.next_slot = 0.0
 
@@ -33,7 +39,7 @@ class _Pacer:
         if not self.interval:
             return
         with self.lock:
-            now = time.monotonic()
+            now = self.clock()
             slot = max(now, self.next_slot)
             self.next_slot = slot + self.interval
         if slot > now:

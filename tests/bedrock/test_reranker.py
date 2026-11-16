@@ -111,3 +111,11 @@ def test_live_relevant_passage_ranks_first():
     ranked = reranker.rerank("Can a car dealer claim ITC on demo vehicles?", chunks, top_n=3)
     assert ranked[0].chunk_id == 2
     print(f"\nscores={[round(c.rerank_score, 4) for c in ranked]} queries={reranker.last_queries}")
+
+
+def test_reranker_is_paced_per_minute():
+    waits: list[float] = []
+    reranker = BedrockReranker(FakeRerank(), requests_per_minute=2.0, sleep=waits.append)
+    reranker.rerank("q", chunks_with("a"), top_n=1)
+    reranker.rerank("q", chunks_with("a"), top_n=1)
+    assert len(waits) == 1 and 29.0 < waits[0] <= 30.0  # the 2nd call waits ~30 s

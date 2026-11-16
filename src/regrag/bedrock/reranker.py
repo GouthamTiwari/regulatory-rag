@@ -15,6 +15,7 @@ import time
 from collections.abc import Callable
 from dataclasses import replace
 
+from regrag.bedrock.embedder import _Pacer
 from regrag.bedrock.retry import with_retries
 from regrag.types import RetrievedChunk
 
@@ -50,6 +51,7 @@ class BedrockReranker:
         client,
         *,
         model_id: str = "amazon.rerank-v1:0",
+        requests_per_minute: float = 0.0,  # 0 = no pacing (tests, fakes)
         sleep: Callable[[float], None] = time.sleep,
     ):
         if model_id not in ADAPTERS:
@@ -58,6 +60,9 @@ class BedrockReranker:
         self.model_id = model_id
         self.build_body = ADAPTERS[model_id]
         self.sleep = sleep
+        # The same pacer as the embedder: a steady pace never trips the quota, while retries
+        # alone kept bouncing off it (20-40 s per call at 2 requests/minute).
+        self.pacer = _Pacer(requests_per_minute / 60.0, sleep)
         self.last_queries = 0
         self.total_queries = 0
 
@@ -65,6 +70,7 @@ class BedrockReranker:
         body = json.dumps(self.build_body(query, documents, len(documents)))
 
         def call():
+            self.pacer.wait()
             return self.client.invoke_model(
                 modelId=self.model_id,
                 body=body,

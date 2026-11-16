@@ -110,8 +110,14 @@ class Settings(BaseSettings):
     # --- Rerank, generation, abstention (SPEC 5) --------------------------------------------
     # Enough context for multi-part questions, small enough to keep the prompt cheap.
     rerank_top_n: int = Field(default=8, gt=0)
-    # Below this top rerank score we abstain. A starting guess; Task 28 picks the real value.
-    abstain_threshold: float = Field(default=0.30, ge=0, le=1)
+    # This account's applied quota for Amazon Rerank 1.0 in Tokyo is 2 requests/minute
+    # (AWS default 200; "not adjustable" while the account is new). Raise when AWS raises it.
+    rerank_requests_per_minute: float = Field(default=2.0, ge=0)
+    # Below this top rerank score we abstain. Calibrated on the 20 golden questions with
+    # Amazon Rerank (2026-11-16): answerable questions scored 0.058-0.997, out-of-corpus ones
+    # 0.0003-0.0007. 0.01 sits between them with a wide margin both ways. (The 0.30 starting
+    # guess was made for Cohere and would have refused good questions.) Task 28 re-tunes it.
+    abstain_threshold: float = Field(default=0.01, ge=0, le=1)
     # Includes Haiku's thinking tokens, which are billed as output.
     llm_max_tokens: int = Field(default=1500, gt=0)
 

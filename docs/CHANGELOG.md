@@ -28,3 +28,4 @@ One line per merged task: date | task | summary.
 - 2026-11-16 | 19 supersession-filter | marks superseded chunks, brings in the newer document, notes amendments; reviewed links only
 - 2026-11-16 | 20 generator | numbered-source prompt in <context> (data, not instructions), [C#] parsing, INSUFFICIENT_EVIDENCE, retry instruction
 - 2026-11-16 | 14 ingest run | all 65 documents stored (2,265 chunks with vectors, $0.016 total); manifest sha256 filled; re-run skips all at $0
+- 2026-11-16 | 22 query-pipeline | answer_question + CLI end to end; abstain threshold calibrated to 0.01 (17/17 answerable hit@1); rerank paced to the 2/min quota; supersession replacement found by rule; first live answers

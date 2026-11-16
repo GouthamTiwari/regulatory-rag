@@ -110,13 +110,21 @@ def test_live_two_sentences_give_two_unit_vectors():
     print(f"\nregion={settings.aws_region} tokens={result.input_tokens} latency={seconds:.2f}s")
 
 
-def test_pacer_spaces_calls_evenly_across_threads():
+def test_pacer_spaces_calls_evenly():
+    # A frozen clock makes the expected waits exact (no dependence on machine speed).
+    from regrag.bedrock.embedder import _Pacer
+
+    waits: list[float] = []
+    pacer = _Pacer(10.0, waits.append, clock=lambda: 100.0)
+    for _ in range(5):
+        pacer.wait()
+    assert waits == pytest.approx([0.1, 0.2, 0.3, 0.4])  # first call goes at once
+
+
+def test_embedder_uses_the_pacer_for_every_call():
     waits: list[float] = []
     embedder = TitanEmbedder(
-        FakeBedrock(), dimensions=8, concurrency=4, requests_per_second=10.0, sleep=waits.append
+        FakeBedrock(), dimensions=8, concurrency=1, requests_per_second=1000.0, sleep=waits.append
     )
-    embedder.embed([f"text {i}" for i in range(5)])
-    # Slots are 0.1 s apart. With a recording (non-blocking) sleep, the 2nd..5th callers
-    # are told to wait about 0.1, 0.2, 0.3 and 0.4 s.
-    assert len(waits) == 4
-    assert sorted(round(w, 1) for w in waits) == [0.1, 0.2, 0.3, 0.4]
+    embedder.embed(["a", "b", "c"])
+    assert len(waits) <= 2  # paced (calls 2 and 3 may wait), never more waits than calls

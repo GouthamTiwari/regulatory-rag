@@ -254,3 +254,28 @@ def resolve_relation_targets(conn: psycopg.Connection) -> int:
                 )
                 resolved += 1
     return resolved
+
+
+def chunks_like(
+    conn: psycopg.Connection, doc_id: str, like_chunk_id: int, limit: int = 2
+) -> list[RetrievedChunk]:
+    """The chunks of `doc_id` closest in meaning to another stored chunk.
+
+    Used for supersession: given a passage from an outdated document, find the passage
+    in its replacement that covers the same rule (closer than searching by the question,
+    which can land on an unrelated part of the new document)."""
+    with conn.cursor(row_factory=dict_row) as cur:
+        cur.execute(
+            f"SELECT {RETRIEVED_COLUMNS}, 1 - (c.embedding <=> o.embedding) AS score "
+            "FROM chunks c JOIN documents d USING (doc_id), chunks o "
+            "WHERE o.chunk_id = %s AND c.doc_id = %s AND c.embedding IS NOT NULL "
+            "ORDER BY c.embedding <=> o.embedding, c.chunk_id LIMIT %s",
+            (like_chunk_id, doc_id, limit),
+        )
+        rows = cur.fetchall()
+    chunks = []
+    for row in rows:
+        chunk = row_to_retrieved(row)
+        chunk.vector_score = float(row["score"])
+        chunks.append(chunk)
+    return chunks

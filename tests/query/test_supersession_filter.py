@@ -41,7 +41,8 @@ NEW_PSL = make_chunk(50, doc_id="rbi-12799", corpus="rbi")
 
 
 def run(chunks, relations, replacement=NEW_PSL):
-    return apply_supersession(chunks, DOCS, relations, lambda doc_id: replacement)
+    found = [replacement] if replacement is not None else []
+    return apply_supersession(chunks, DOCS, relations, lambda doc_id, old: found)
 
 
 def test_superseded_with_replacement_in_corpus():
@@ -84,3 +85,15 @@ def test_unreviewed_links_are_ignored():
     )
     chunks, notes = run([make_chunk(4, doc_id="gst-195-07-2023")], [unreviewed])
     assert notes == []
+
+
+def test_replacement_lookup_gets_the_newer_doc_and_the_old_chunk():
+    calls = []
+
+    def fetch(doc_id, old):
+        calls.append((doc_id, old.chunk_id))
+        return [NEW_PSL, make_chunk(51, doc_id="rbi-12799", corpus="rbi")]
+
+    chunks, _ = apply_supersession([make_chunk(1, doc_id="rbi-11959")], DOCS, [SUPERSEDES], fetch)
+    assert calls == [("rbi-12799", 1)]
+    assert [c.chunk_id for c in chunks] == [1, 50, 51]  # old rule, then the new one(s)
