@@ -14,3 +14,4 @@ One line per merged task: date | task | summary.
 - 2026-11-16 | 08 chunker | section-aware chunks (400/500 tokens, 60 overlap, never across chapters), tables kept whole with captions; corpus -> 2,265 chunks
 - 2026-11-16 | 09 supersession | operative-phrase + reference extraction (boilerplate-proof), repeal/consolidation tables; 61 relations on corpus, 5 of 7 manual links recovered
 - 2026-11-16 | 17 rrf-hybrid | rrf_fuse (k=60, rank-based, repeatable ties) and HybridRetriever over any two retrievers
+- 2026-11-16 | 21 validator | citation validator (unknown markers, uncited rule sentences), validator chain, abstain decision (weak/insufficient/invalid)
