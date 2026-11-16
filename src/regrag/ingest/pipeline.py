@@ -232,13 +232,17 @@ def main(argv: list[str] | None = None) -> int:
         MANIFEST_PATH, {r.doc_id: r.sha256 for r in reports if r.sha256}
     )
     extracted = [rel for r in reports for rel in r.relations]
-    write_extracted_relations(EXTRACTED_RELATIONS_PATH, extracted)
+    # Only when something was re-extracted: a run that skipped every document must not
+    # overwrite the review file with an empty list.
+    if extracted:
+        write_extracted_relations(EXTRACTED_RELATIONS_PATH, extracted)
     print(summarize(reports, time.perf_counter() - start))
     print(
         f"Manual relations loaded: {len(manual)}  link targets resolved: {resolved}  "
         f"manifest hashes updated: {changed}"
     )
-    print(f"Extracted relations for review: {EXTRACTED_RELATIONS_PATH}")
+    if extracted:
+        print(f"Extracted relations for review: {EXTRACTED_RELATIONS_PATH}")
     return 1 if any(r.status == "failed" for r in reports) else 0
 
 

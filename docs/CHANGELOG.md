@@ -27,3 +27,4 @@ One line per merged task: date | task | summary.
 - 2026-11-16 | 18 router | keyword rules (rbi/gst/both) with a one-word LLM fallback only when rules are silent; unsure -> both
 - 2026-11-16 | 19 supersession-filter | marks superseded chunks, brings in the newer document, notes amendments; reviewed links only
 - 2026-11-16 | 20 generator | numbered-source prompt in <context> (data, not instructions), [C#] parsing, INSUFFICIENT_EVIDENCE, retry instruction
+- 2026-11-16 | 14 ingest run | all 65 documents stored (2,265 chunks with vectors, $0.016 total); manifest sha256 filled; re-run skips all at $0

@@ -20,7 +20,14 @@ Branch: task/14-ingest-pipeline | Date: 2026-11-16
 ## How to verify
 - `uv run python -m regrag.ingest.pipeline --skip-download --dry-run` → 65 documents, 2,265 chunks, 251 tables, 691,204 estimated embedding tokens, **$0.0166**, 61 extracted relations.
 - `uv run pytest tests/ingest/test_pipeline.py` → 6 passed
-- Real run results: recorded below once the paced run completes.
+- **Real run (2026-11-16, paced at 1 call/s):**
+  - **65 of 65 documents stored, 0 failed:** 62 ingested in this run and 3 skipped, since they were stored by the earlier frozen run.
+  - **Database:** 2,265 chunks (251 tables), every chunk with its vector.
+  - **Cost:** 524,135 embedding tokens for **$0.0126**. Together with the first partial run, about $0.016 in total. Time: 2,093 s.
+  - **Relations:** 61 extracted; 7 manual loaded, **4 of them resolved to in-corpus documents** (PSL 2025 → PSL 2020, 216 → 195, 225 → 204, the corrigendum → 237). The other 3 targets are outside the corpus by design.
+  - **Manifest:** all 65 PDF sha256 values written to `data/manifest.csv`.
+- **Second run:** `65 skipped, 0 ingested, $0.0000, 2 s`, so there are no duplicate chunks and unchanged documents cost nothing (acceptance criterion).
+- **Bug found by the second run and fixed:** a run that skips every document overwrote `data/raw/extracted_relations.csv` with an empty list. The file is now written only when something was extracted, and it was rebuilt from the 61 links in the database. This is a two-line guard in `main()`, which needs AWS and Docker, so it isn't unit-tested.
 
 ## Tests
 - 6 tests with fakes (no AWS, no database): 2 documents → upsert/relations calls in order, everything embedded before storing; a parse failure in one document doesn't stop the other; an unchanged document is skipped on the second run with no second embed call and $0; a missing PDF is reported; a dry run estimates cost and stores nothing; the manifest hash update changes only that column and is idempotent.
