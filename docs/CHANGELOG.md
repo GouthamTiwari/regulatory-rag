@@ -25,3 +25,4 @@ One line per merged task: date | task | summary.
 - 2026-11-16 | 15 keyword-retriever | websearch_to_tsquery + ts_rank_cd with route filter and any-word fallback; db fixtures shared project-wide
 - 2026-11-16 | 16 vector-retriever | cosine HNSW search with ef_search + iterative scan so route filters still fill top_k
 - 2026-11-16 | 18 router | keyword rules (rbi/gst/both) with a one-word LLM fallback only when rules are silent; unsure -> both
+- 2026-11-16 | 19 supersession-filter | marks superseded chunks, brings in the newer document, notes amendments; reviewed links only
