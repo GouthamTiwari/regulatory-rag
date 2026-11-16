@@ -32,3 +32,4 @@ One line per merged task: date | task | summary.
 - 2026-11-16 | 25 judge | per-sentence supported/unsupported JSON judge, strict parsing, one retry, None (not 0) on failure; model-agnostic
 - 2026-11-16 | 26 eval-runner | 4-way eval runner + report; sample on 20 seed questions: retrieval saturated at doc level, configs differ in wrong abstentions (keyword 0.65 -> vector 1.00), $0.26
 - 2026-11-16 | 29 readme (v1) | full README: example, Mermaid architecture, Windows setup incl. RBI CAPTCHA step, sample results with honest reading, design decisions; final table after Task 28
+- 2026-11-16 | 27 golden-drafts (part 1) | draft questions from sampled passages with section-level gold + 8 hand-written; one Excel review sheet; accept writes kept rows as reviewed
