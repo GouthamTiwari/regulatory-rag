@@ -2,6 +2,10 @@
 
 import pytest
 
+# Share the database fixtures with every test folder (the retrievers' db tests live in
+# tests/retrieval/). Importing them here is how pytest makes fixtures visible project-wide.
+from tests.db.conftest import db_conn, db_schema  # noqa: F401
+
 # The opt-in markers from pyproject.toml. Selecting them is a deliberate choice.
 OPT_IN_MARKERS = ("live", "db")
 

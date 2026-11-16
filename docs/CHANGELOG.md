@@ -22,3 +22,4 @@ One line per merged task: date | task | summary.
 - 2026-11-16 | 12 llm | BedrockLLM over Converse (text blocks only, usage, retries, temperature 0); live: Nova 2 Lite 0.93 s, $0.00015
 - 2026-11-16 | 13 repository | transactional document/chunk upsert, relations (both directions, ref -> doc_id), nearest chunk, query logs; fixed db test isolation
 - 2026-11-16 | 14 ingest-pipeline | end-to-end ingest (one transaction per document, skip unchanged, dry-run cost); paced Titan calls at 1/s after diagnosing burst throttling
+- 2026-11-16 | 15 keyword-retriever | websearch_to_tsquery + ts_rank_cd with route filter and any-word fallback; db fixtures shared project-wide
