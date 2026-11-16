@@ -1,0 +1,2624 @@
+{
+  "meta": {
+    "date": "2026-11-16",
+    "questions": 20,
+    "reviewed": 0,
+    "retrieval_only": false,
+    "sample": true,
+    "sample_note": "Run on the 20 seed questions, which Goutham has not reviewed yet.",
+    "llm": "global.amazon.nova-2-lite-v1:0",
+    "judge": "global.amazon.nova-2-lite-v1:0",
+    "embed": "amazon.titan-embed-text-v2:0",
+    "rerank": "amazon.rerank-v1:0",
+    "region": "ap-south-1",
+    "rerank_region": "ap-northeast-1",
+    "prices_checked_on": "2026-11-16",
+    "total_cost": 0.263678304
+  },
+  "summary": {
+    "bm25": {
+      "questions": 20,
+      "errors": 0,
+      "recall_at_5": 0.9411764705882353,
+      "recall_at_10": 1.0,
+      "mrr": 0.8637254901960785,
+      "citation_validity": 1.0,
+      "citation_accuracy": 0.9142857142857143,
+      "faithfulness": 0.9025641025641026,
+      "judge_failed": 0,
+      "abstain_accuracy": 0.65,
+      "abstain_precision": 0.3,
+      "abstain_recall": 1.0,
+      "supersession_flag_rate": 1.0,
+      "latency_p95_s": 3.687,
+      "mean_cost_usd": 0.00277849,
+      "total_cost_usd": 0.0555698
+    },
+    "vector": {
+      "questions": 20,
+      "errors": 0,
+      "recall_at_5": 1.0,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "citation_validity": 1.0,
+      "citation_accuracy": 0.9583333333333334,
+      "faithfulness": 0.9605042016806723,
+      "judge_failed": 0,
+      "abstain_accuracy": 1.0,
+      "abstain_precision": 1.0,
+      "abstain_recall": 1.0,
+      "supersession_flag_rate": 1.0,
+      "latency_p95_s": 6.1405,
+      "mean_cost_usd": 0.0029335209,
+      "total_cost_usd": 0.058670418
+    },
+    "hybrid": {
+      "questions": 20,
+      "errors": 0,
+      "recall_at_5": 1.0,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "citation_validity": 1.0,
+      "citation_accuracy": 0.953125,
+      "faithfulness": 0.9397435897435897,
+      "judge_failed": 0,
+      "abstain_accuracy": 0.8,
+      "abstain_precision": 0.42857142857142855,
+      "abstain_recall": 1.0,
+      "supersession_flag_rate": 1.0,
+      "latency_p95_s": 5.2139,
+      "mean_cost_usd": 0.0031882359,
+      "total_cost_usd": 0.063764718
+    },
+    "hybrid_rerank": {
+      "questions": 20,
+      "errors": 0,
+      "recall_at_5": 1.0,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "citation_validity": 1.0,
+      "citation_accuracy": 0.9444444444444444,
+      "faithfulness": 0.9270833333333334,
+      "judge_failed": 0,
+      "abstain_accuracy": 0.95,
+      "abstain_precision": 0.75,
+      "abstain_recall": 1.0,
+      "supersession_flag_rate": 1.0,
+      "latency_p95_s": 38.4786,
+      "mean_cost_usd": 0.0042836684,
+      "total_cost_usd": 0.085673368
+    }
+  },
+  "rows": [
+    {
+      "id": "g001",
+      "type": "factual",
+      "config": "bm25",
+      "status": "ok",
+      "error": "",
+      "abstained": true,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [],
+      "supplied": 8,
+      "cited_docs": [],
+      "expected_docs": [
+        "rbi-13141"
+      ],
+      "faithfulness": null,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 1648.2,
+      "cost_usd": 0.0013524
+    },
+    {
+      "id": "g002",
+      "type": "table",
+      "config": "bm25",
+      "status": "ok",
+      "error": "",
+      "abstained": true,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [],
+      "supplied": 8,
+      "cited_docs": [],
+      "expected_docs": [
+        "rbi-12156"
+      ],
+      "faithfulness": null,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 1182.7,
+      "cost_usd": 0.0017251999999999999
+    },
+    {
+      "id": "g003",
+      "type": "factual",
+      "config": "bm25",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [
+        "C1",
+        "C2",
+        "C3"
+      ],
+      "supplied": 8,
+      "cited_docs": [
+        "rbi-12898",
+        "rbi-12898",
+        "rbi-12898"
+      ],
+      "expected_docs": [
+        "rbi-12898"
+      ],
+      "faithfulness": 1.0,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 1526.8,
+      "cost_usd": 0.00277215
+    },
+    {
+      "id": "g004",
+      "type": "factual",
+      "config": "bm25",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [
+        "C1",
+        "C2",
+        "C3",
+        "C4",
+        "C5",
+        "C6"
+      ],
+      "supplied": 8,
+      "cited_docs": [
+        "gst-231-25-2024",
+        "gst-231-25-2024",
+        "gst-231-25-2024",
+        "gst-231-25-2024",
+        "gst-231-25-2024",
+        "gst-231-25-2024"
+      ],
+      "expected_docs": [
+        "gst-231-25-2024"
+      ],
+      "faithfulness": 1.0,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 3924.7,
+      "cost_usd": 0.00570525
+    },
+    {
+      "id": "g005",
+      "type": "factual",
+      "config": "bm25",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [
+        "C2"
+      ],
+      "supplied": 8,
+      "cited_docs": [
+        "gst-232-26-2024"
+      ],
+      "expected_docs": [
+        "gst-232-26-2024"
+      ],
+      "faithfulness": 1.0,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 1356.2,
+      "cost_usd": 0.00273335
+    },
+    {
+      "id": "g006",
+      "type": "factual",
+      "config": "bm25",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [
+        "C1",
+        "C6"
+      ],
+      "supplied": 8,
+      "cited_docs": [
+        "gst-198-10-2023",
+        "gst-198-10-2023"
+      ],
+      "expected_docs": [
+        "gst-198-10-2023"
+      ],
+      "faithfulness": 0.5,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 1220.3,
+      "cost_usd": 0.00225265
+    },
+    {
+      "id": "g007",
+      "type": "cross_corpus",
+      "config": "bm25",
+      "status": "ok",
+      "error": "",
+      "abstained": true,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 0.25,
+      "markers": [],
+      "supplied": 8,
+      "cited_docs": [],
+      "expected_docs": [
+        "gst-220-14-2024",
+        "rbi-13141"
+      ],
+      "faithfulness": null,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 3687.0,
+      "cost_usd": 0.0045012
+    },
+    {
+      "id": "g008",
+      "type": "cross_corpus",
+      "config": "bm25",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [
+        "C3",
+        "C4",
+        "C5",
+        "C6"
+      ],
+      "supplied": 8,
+      "cited_docs": [
+        "gst-243-37-2024",
+        "gst-243-37-2024",
+        "rbi-12156",
+        "gst-245-02-2025"
+      ],
+      "expected_docs": [
+        "gst-243-37-2024",
+        "rbi-12156"
+      ],
+      "faithfulness": 0.6923076923076923,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 2387.4,
+      "cost_usd": 0.0042824000000000004
+    },
+    {
+      "id": "g009",
+      "type": "superseded",
+      "config": "bm25",
+      "status": "ok",
+      "error": "",
+      "abstained": true,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [],
+      "supplied": 6,
+      "cited_docs": [],
+      "expected_docs": [
+        "rbi-12799",
+        "rbi-11959"
+      ],
+      "faithfulness": null,
+      "judge_failed": false,
+      "has_notes": true,
+      "must_flag": true,
+      "latency_ms": 1576.5,
+      "cost_usd": 0.00206645
+    },
+    {
+      "id": "g010",
+      "type": "abstain",
+      "config": "bm25",
+      "status": "ok",
+      "error": "",
+      "abstained": true,
+      "should_abstain": true,
+      "recall_at_5": null,
+      "recall_at_10": null,
+      "mrr": null,
+      "markers": [],
+      "supplied": 8,
+      "cited_docs": [],
+      "expected_docs": [],
+      "faithfulness": null,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 1098.5,
+      "cost_usd": 0.0012970500000000001
+    },
+    {
+      "id": "g011",
+      "type": "superseded",
+      "config": "bm25",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [
+        "C1",
+        "C2",
+        "C3"
+      ],
+      "supplied": 8,
+      "cited_docs": [
+        "gst-195-07-2023",
+        "gst-195-07-2023",
+        "gst-216-10-2024"
+      ],
+      "expected_docs": [
+        "gst-216-10-2024",
+        "gst-195-07-2023"
+      ],
+      "faithfulness": 1.0,
+      "judge_failed": false,
+      "has_notes": true,
+      "must_flag": true,
+      "latency_ms": 1657.3,
+      "cost_usd": 0.003601
+    },
+    {
+      "id": "g012",
+      "type": "superseded",
+      "config": "bm25",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 0.3333333333333333,
+      "markers": [
+        "C7",
+        "C3",
+        "C4",
+        "C6"
+      ],
+      "supplied": 8,
+      "cited_docs": [
+        "gst-237-31-2024",
+        "gst-237-31-2024",
+        "gst-237-31-2024",
+        "gst-237-31-2024"
+      ],
+      "expected_docs": [
+        "gst-237-31-2024",
+        "gst-237-31-2024-corr"
+      ],
+      "faithfulness": 0.8333333333333334,
+      "judge_failed": false,
+      "has_notes": true,
+      "must_flag": true,
+      "latency_ms": 1552.4,
+      "cost_usd": 0.00338205
+    },
+    {
+      "id": "g013",
+      "type": "superseded",
+      "config": "bm25",
+      "status": "ok",
+      "error": "",
+      "abstained": true,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [],
+      "supplied": 6,
+      "cited_docs": [],
+      "expected_docs": [
+        "rbi-11959",
+        "rbi-12799"
+      ],
+      "faithfulness": null,
+      "judge_failed": false,
+      "has_notes": true,
+      "must_flag": true,
+      "latency_ms": 1235.9,
+      "cost_usd": 0.0021546499999999997
+    },
+    {
+      "id": "g014",
+      "type": "abstain",
+      "config": "bm25",
+      "status": "ok",
+      "error": "",
+      "abstained": true,
+      "should_abstain": true,
+      "recall_at_5": null,
+      "recall_at_10": null,
+      "mrr": null,
+      "markers": [],
+      "supplied": 8,
+      "cited_docs": [],
+      "expected_docs": [],
+      "faithfulness": null,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 1960.0,
+      "cost_usd": 0.00181265
+    },
+    {
+      "id": "g015",
+      "type": "abstain",
+      "config": "bm25",
+      "status": "ok",
+      "error": "",
+      "abstained": true,
+      "should_abstain": true,
+      "recall_at_5": null,
+      "recall_at_10": null,
+      "mrr": null,
+      "markers": [],
+      "supplied": 8,
+      "cited_docs": [],
+      "expected_docs": [],
+      "faithfulness": null,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 1140.7,
+      "cost_usd": 0.00114725
+    },
+    {
+      "id": "g016",
+      "type": "cross_corpus",
+      "config": "bm25",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [
+        "C1",
+        "C2",
+        "C5",
+        "C6",
+        "C3",
+        "C4"
+      ],
+      "supplied": 8,
+      "cited_docs": [
+        "gst-225-19-2024",
+        "gst-225-19-2024",
+        "gst-225-19-2024",
+        "gst-204-16-2023",
+        "rbi-12965",
+        "rbi-12965"
+      ],
+      "expected_docs": [
+        "gst-225-19-2024",
+        "gst-204-16-2023",
+        "rbi-12957"
+      ],
+      "faithfulness": 1.0,
+      "judge_failed": false,
+      "has_notes": true,
+      "must_flag": false,
+      "latency_ms": 2356.2,
+      "cost_usd": 0.00493295
+    },
+    {
+      "id": "g017",
+      "type": "cross_corpus",
+      "config": "bm25",
+      "status": "ok",
+      "error": "",
+      "abstained": true,
+      "should_abstain": false,
+      "recall_at_5": 0,
+      "recall_at_10": 1,
+      "mrr": 0.1,
+      "markers": [],
+      "supplied": 8,
+      "cited_docs": [],
+      "expected_docs": [
+        "rbi-13139",
+        "gst-210-04-2024"
+      ],
+      "faithfulness": null,
+      "judge_failed": false,
+      "has_notes": true,
+      "must_flag": false,
+      "latency_ms": 1403.3,
+      "cost_usd": 0.00188325
+    },
+    {
+      "id": "g018",
+      "type": "factual",
+      "config": "bm25",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [
+        "C3",
+        "C6",
+        "C8"
+      ],
+      "supplied": 8,
+      "cited_docs": [
+        "rbi-10192",
+        "rbi-10192",
+        "rbi-10192"
+      ],
+      "expected_docs": [
+        "rbi-10192"
+      ],
+      "faithfulness": 1.0,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 1036.6,
+      "cost_usd": 0.0023447499999999996
+    },
+    {
+      "id": "g019",
+      "type": "factual",
+      "config": "bm25",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [
+        "C1",
+        "C3",
+        "C2"
+      ],
+      "supplied": 8,
+      "cited_docs": [
+        "gst-246-03-2025",
+        "gst-246-03-2025",
+        "gst-246-03-2025"
+      ],
+      "expected_docs": [
+        "gst-246-03-2025"
+      ],
+      "faithfulness": 1.0,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 1995.8,
+      "cost_usd": 0.00376825
+    },
+    {
+      "id": "g020",
+      "type": "table",
+      "config": "bm25",
+      "status": "ok",
+      "error": "",
+      "abstained": true,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [],
+      "supplied": 8,
+      "cited_docs": [],
+      "expected_docs": [
+        "rbi-12156"
+      ],
+      "faithfulness": null,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 1208.1,
+      "cost_usd": 0.0018548999999999998
+    },
+    {
+      "id": "g001",
+      "type": "factual",
+      "config": "vector",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [
+        "C4"
+      ],
+      "supplied": 8,
+      "cited_docs": [
+        "rbi-13141"
+      ],
+      "expected_docs": [
+        "rbi-13141"
+      ],
+      "faithfulness": 1.0,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 1809.7,
+      "cost_usd": 0.00335698
+    },
+    {
+      "id": "g002",
+      "type": "table",
+      "config": "vector",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [
+        "C2",
+        "C3"
+      ],
+      "supplied": 8,
+      "cited_docs": [
+        "rbi-12156",
+        "rbi-12156"
+      ],
+      "expected_docs": [
+        "rbi-12156"
+      ],
+      "faithfulness": 1.0,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 1047.2,
+      "cost_usd": 0.001807908
+    },
+    {
+      "id": "g003",
+      "type": "factual",
+      "config": "vector",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [
+        "C1",
+        "C2",
+        "C4",
+        "C3",
+        "C7"
+      ],
+      "supplied": 8,
+      "cited_docs": [
+        "rbi-12898",
+        "rbi-13642",
+        "rbi-13591",
+        "rbi-13751",
+        "rbi-12898"
+      ],
+      "expected_docs": [
+        "rbi-12898"
+      ],
+      "faithfulness": 1.0,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 1282.4,
+      "cost_usd": 0.002232562
+    },
+    {
+      "id": "g004",
+      "type": "factual",
+      "config": "vector",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [
+        "C1",
+        "C2",
+        "C3",
+        "C4",
+        "C5",
+        "C6",
+        "C7",
+        "C8"
+      ],
+      "supplied": 8,
+      "cited_docs": [
+        "gst-231-25-2024",
+        "gst-231-25-2024",
+        "gst-231-25-2024",
+        "gst-231-25-2024",
+        "gst-231-25-2024",
+        "gst-231-25-2024",
+        "gst-231-25-2024",
+        "gst-231-25-2024"
+      ],
+      "expected_docs": [
+        "gst-231-25-2024"
+      ],
+      "faithfulness": 1.0,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 2805.2,
+      "cost_usd": 0.0036948119999999996
+    },
+    {
+      "id": "g005",
+      "type": "factual",
+      "config": "vector",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [
+        "C2",
+        "C4",
+        "C5",
+        "C6",
+        "C7",
+        "C8",
+        "C1"
+      ],
+      "supplied": 8,
+      "cited_docs": [
+        "gst-232-26-2024",
+        "gst-232-26-2024",
+        "gst-232-26-2024",
+        "gst-232-26-2024",
+        "gst-232-26-2024",
+        "gst-232-26-2024",
+        "gst-232-26-2024"
+      ],
+      "expected_docs": [
+        "gst-232-26-2024"
+      ],
+      "faithfulness": 1.0,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 1884.1,
+      "cost_usd": 0.0036733060000000003
+    },
+    {
+      "id": "g006",
+      "type": "factual",
+      "config": "vector",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [
+        "C1",
+        "C2",
+        "C3"
+      ],
+      "supplied": 8,
+      "cited_docs": [
+        "gst-198-10-2023",
+        "gst-198-10-2023",
+        "gst-198-10-2023"
+      ],
+      "expected_docs": [
+        "gst-198-10-2023"
+      ],
+      "faithfulness": 1.0,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 1976.3,
+      "cost_usd": 0.0020200039999999997
+    },
+    {
+      "id": "g007",
+      "type": "cross_corpus",
+      "config": "vector",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [
+        "C2",
+        "C8"
+      ],
+      "supplied": 8,
+      "cited_docs": [
+        "gst-220-14-2024",
+        "rbi-13141"
+      ],
+      "expected_docs": [
+        "gst-220-14-2024",
+        "rbi-13141"
+      ],
+      "faithfulness": 1.0,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 2625.2,
+      "cost_usd": 0.003151696
+    },
+    {
+      "id": "g008",
+      "type": "cross_corpus",
+      "config": "vector",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [
+        "C1",
+        "C2",
+        "C3",
+        "C4",
+        "C5",
+        "C6",
+        "C7",
+        "C8"
+      ],
+      "supplied": 8,
+      "cited_docs": [
+        "gst-243-37-2024",
+        "gst-243-37-2024",
+        "gst-243-37-2024",
+        "rbi-12156",
+        "gst-243-37-2024",
+        "gst-243-37-2024",
+        "rbi-12156",
+        "gst-243-37-2024"
+      ],
+      "expected_docs": [
+        "gst-243-37-2024",
+        "rbi-12156"
+      ],
+      "faithfulness": 1.0,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 2819.4,
+      "cost_usd": 0.004838828
+    },
+    {
+      "id": "g009",
+      "type": "superseded",
+      "config": "vector",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [
+        "C1",
+        "C2",
+        "C3"
+      ],
+      "supplied": 3,
+      "cited_docs": [
+        "rbi-11959",
+        "rbi-12799",
+        "rbi-12799"
+      ],
+      "expected_docs": [
+        "rbi-12799",
+        "rbi-11959"
+      ],
+      "faithfulness": 1.0,
+      "judge_failed": false,
+      "has_notes": true,
+      "must_flag": true,
+      "latency_ms": 1216.3,
+      "cost_usd": 0.001323224
+    },
+    {
+      "id": "g010",
+      "type": "abstain",
+      "config": "vector",
+      "status": "ok",
+      "error": "",
+      "abstained": true,
+      "should_abstain": true,
+      "recall_at_5": null,
+      "recall_at_10": null,
+      "mrr": null,
+      "markers": [],
+      "supplied": 8,
+      "cited_docs": [],
+      "expected_docs": [],
+      "faithfulness": null,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 2893.3,
+      "cost_usd": 0.001186384
+    },
+    {
+      "id": "g011",
+      "type": "superseded",
+      "config": "vector",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [
+        "C4",
+        "C2",
+        "C3",
+        "C5"
+      ],
+      "supplied": 8,
+      "cited_docs": [
+        "gst-195-07-2023",
+        "gst-216-10-2024",
+        "gst-216-10-2024",
+        "gst-216-10-2024"
+      ],
+      "expected_docs": [
+        "gst-216-10-2024",
+        "gst-195-07-2023"
+      ],
+      "faithfulness": 0.7142857142857143,
+      "judge_failed": false,
+      "has_notes": true,
+      "must_flag": true,
+      "latency_ms": 4426.8,
+      "cost_usd": 0.003468418
+    },
+    {
+      "id": "g012",
+      "type": "superseded",
+      "config": "vector",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [
+        "C1",
+        "C2",
+        "C3",
+        "C4",
+        "C5",
+        "C6",
+        "C8",
+        "C7"
+      ],
+      "supplied": 8,
+      "cited_docs": [
+        "gst-237-31-2024",
+        "gst-237-31-2024",
+        "gst-237-31-2024",
+        "gst-237-31-2024",
+        "gst-237-31-2024",
+        "gst-237-31-2024",
+        "gst-237-31-2024",
+        "gst-237-31-2024-corr"
+      ],
+      "expected_docs": [
+        "gst-237-31-2024",
+        "gst-237-31-2024-corr"
+      ],
+      "faithfulness": 0.7142857142857143,
+      "judge_failed": false,
+      "has_notes": true,
+      "must_flag": true,
+      "latency_ms": 4079.7,
+      "cost_usd": 0.004048792
+    },
+    {
+      "id": "g013",
+      "type": "superseded",
+      "config": "vector",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [
+        "C1",
+        "C4",
+        "C5"
+      ],
+      "supplied": 6,
+      "cited_docs": [
+        "rbi-11959",
+        "rbi-12799",
+        "rbi-12799"
+      ],
+      "expected_docs": [
+        "rbi-11959",
+        "rbi-12799"
+      ],
+      "faithfulness": 1.0,
+      "judge_failed": false,
+      "has_notes": true,
+      "must_flag": true,
+      "latency_ms": 1934.9,
+      "cost_usd": 0.002693946
+    },
+    {
+      "id": "g014",
+      "type": "abstain",
+      "config": "vector",
+      "status": "ok",
+      "error": "",
+      "abstained": true,
+      "should_abstain": true,
+      "recall_at_5": null,
+      "recall_at_10": null,
+      "mrr": null,
+      "markers": [],
+      "supplied": 8,
+      "cited_docs": [],
+      "expected_docs": [],
+      "faithfulness": null,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 6140.5,
+      "cost_usd": 0.001102804
+    },
+    {
+      "id": "g015",
+      "type": "abstain",
+      "config": "vector",
+      "status": "ok",
+      "error": "",
+      "abstained": true,
+      "should_abstain": true,
+      "recall_at_5": null,
+      "recall_at_10": null,
+      "mrr": null,
+      "markers": [],
+      "supplied": 8,
+      "cited_docs": [],
+      "expected_docs": [],
+      "faithfulness": null,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 1684.8,
+      "cost_usd": 0.001011184
+    },
+    {
+      "id": "g016",
+      "type": "cross_corpus",
+      "config": "vector",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [
+        "C1",
+        "C2",
+        "C3",
+        "C4",
+        "C7",
+        "C5",
+        "C6",
+        "C8"
+      ],
+      "supplied": 8,
+      "cited_docs": [
+        "gst-225-19-2024",
+        "gst-225-19-2024",
+        "gst-204-16-2023",
+        "gst-225-19-2024",
+        "gst-204-16-2023",
+        "gst-204-16-2023",
+        "gst-204-16-2023",
+        "gst-204-16-2023"
+      ],
+      "expected_docs": [
+        "gst-225-19-2024",
+        "gst-204-16-2023",
+        "rbi-12957"
+      ],
+      "faithfulness": 1.0,
+      "judge_failed": false,
+      "has_notes": true,
+      "must_flag": false,
+      "latency_ms": 7091.3,
+      "cost_usd": 0.006707588
+    },
+    {
+      "id": "g017",
+      "type": "cross_corpus",
+      "config": "vector",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [
+        "C2"
+      ],
+      "supplied": 8,
+      "cited_docs": [
+        "rbi-13139"
+      ],
+      "expected_docs": [
+        "rbi-13139",
+        "gst-210-04-2024"
+      ],
+      "faithfulness": 0.9,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 6131.1,
+      "cost_usd": 0.004715844
+    },
+    {
+      "id": "g018",
+      "type": "factual",
+      "config": "vector",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [
+        "C1",
+        "C2",
+        "C4"
+      ],
+      "supplied": 8,
+      "cited_docs": [
+        "rbi-10192",
+        "rbi-10192",
+        "rbi-10192"
+      ],
+      "expected_docs": [
+        "rbi-10192"
+      ],
+      "faithfulness": 1.0,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 2063.8,
+      "cost_usd": 0.002302802
+    },
+    {
+      "id": "g019",
+      "type": "factual",
+      "config": "vector",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [
+        "C1",
+        "C3",
+        "C4",
+        "C2"
+      ],
+      "supplied": 8,
+      "cited_docs": [
+        "gst-246-03-2025",
+        "gst-246-03-2025",
+        "gst-246-03-2025",
+        "gst-246-03-2025"
+      ],
+      "expected_docs": [
+        "gst-246-03-2025"
+      ],
+      "faithfulness": 1.0,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 1904.9,
+      "cost_usd": 0.0033697299999999996
+    },
+    {
+      "id": "g020",
+      "type": "table",
+      "config": "vector",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [
+        "C2",
+        "C5"
+      ],
+      "supplied": 8,
+      "cited_docs": [
+        "rbi-12156",
+        "rbi-12156"
+      ],
+      "expected_docs": [
+        "rbi-12156"
+      ],
+      "faithfulness": 1.0,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 2342.9,
+      "cost_usd": 0.001963606
+    },
+    {
+      "id": "g001",
+      "type": "factual",
+      "config": "hybrid",
+      "status": "ok",
+      "error": "",
+      "abstained": true,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [],
+      "supplied": 8,
+      "cited_docs": [],
+      "expected_docs": [
+        "rbi-13141"
+      ],
+      "faithfulness": null,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 6352.6,
+      "cost_usd": 0.00132548
+    },
+    {
+      "id": "g002",
+      "type": "table",
+      "config": "hybrid",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [
+        "C1"
+      ],
+      "supplied": 8,
+      "cited_docs": [
+        "rbi-12156"
+      ],
+      "expected_docs": [
+        "rbi-12156"
+      ],
+      "faithfulness": 1.0,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 2595.3,
+      "cost_usd": 0.002961108
+    },
+    {
+      "id": "g003",
+      "type": "factual",
+      "config": "hybrid",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [
+        "C1",
+        "C3",
+        "C4",
+        "C5",
+        "C6"
+      ],
+      "supplied": 8,
+      "cited_docs": [
+        "rbi-12898",
+        "rbi-12898",
+        "rbi-13642",
+        "rbi-13591",
+        "rbi-13642"
+      ],
+      "expected_docs": [
+        "rbi-12898"
+      ],
+      "faithfulness": 1.0,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 3709.7,
+      "cost_usd": 0.003505162
+    },
+    {
+      "id": "g004",
+      "type": "factual",
+      "config": "hybrid",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [
+        "C1",
+        "C2",
+        "C3",
+        "C4",
+        "C5",
+        "C6",
+        "C7",
+        "C8"
+      ],
+      "supplied": 8,
+      "cited_docs": [
+        "gst-231-25-2024",
+        "gst-231-25-2024",
+        "gst-231-25-2024",
+        "gst-231-25-2024",
+        "gst-231-25-2024",
+        "gst-231-25-2024",
+        "gst-231-25-2024",
+        "gst-231-25-2024"
+      ],
+      "expected_docs": [
+        "gst-231-25-2024"
+      ],
+      "faithfulness": 1.0,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 4298.0,
+      "cost_usd": 0.003995612
+    },
+    {
+      "id": "g005",
+      "type": "factual",
+      "config": "hybrid",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [
+        "C1",
+        "C4",
+        "C5",
+        "C3",
+        "C2"
+      ],
+      "supplied": 8,
+      "cited_docs": [
+        "gst-232-26-2024",
+        "gst-232-26-2024",
+        "gst-232-26-2024",
+        "gst-232-26-2024",
+        "gst-232-26-2024"
+      ],
+      "expected_docs": [
+        "gst-232-26-2024"
+      ],
+      "faithfulness": 1.0,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 2199.7,
+      "cost_usd": 0.003552306
+    },
+    {
+      "id": "g006",
+      "type": "factual",
+      "config": "hybrid",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [
+        "C1",
+        "C2",
+        "C8"
+      ],
+      "supplied": 8,
+      "cited_docs": [
+        "gst-198-10-2023",
+        "gst-198-10-2023",
+        "gst-198-10-2023"
+      ],
+      "expected_docs": [
+        "gst-198-10-2023"
+      ],
+      "faithfulness": 1.0,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 2566.3,
+      "cost_usd": 0.0024691039999999997
+    },
+    {
+      "id": "g007",
+      "type": "cross_corpus",
+      "config": "hybrid",
+      "status": "ok",
+      "error": "",
+      "abstained": true,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [],
+      "supplied": 8,
+      "cited_docs": [],
+      "expected_docs": [
+        "gst-220-14-2024",
+        "rbi-13141"
+      ],
+      "faithfulness": null,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 3786.8,
+      "cost_usd": 0.0039006460000000002
+    },
+    {
+      "id": "g008",
+      "type": "cross_corpus",
+      "config": "hybrid",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [
+        "C1",
+        "C2",
+        "C3",
+        "C4",
+        "C5",
+        "C7",
+        "C6",
+        "C8"
+      ],
+      "supplied": 8,
+      "cited_docs": [
+        "gst-243-37-2024",
+        "gst-243-37-2024",
+        "gst-243-37-2024",
+        "gst-243-37-2024",
+        "rbi-12156",
+        "rbi-12156",
+        "rbi-12156",
+        "rbi-12156"
+      ],
+      "expected_docs": [
+        "gst-243-37-2024",
+        "rbi-12156"
+      ],
+      "faithfulness": 0.9166666666666666,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 4860.2,
+      "cost_usd": 0.0057759280000000005
+    },
+    {
+      "id": "g009",
+      "type": "superseded",
+      "config": "hybrid",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [
+        "C1",
+        "C3"
+      ],
+      "supplied": 5,
+      "cited_docs": [
+        "rbi-11959",
+        "rbi-12799"
+      ],
+      "expected_docs": [
+        "rbi-12799",
+        "rbi-11959"
+      ],
+      "faithfulness": 0.8,
+      "judge_failed": false,
+      "has_notes": true,
+      "must_flag": true,
+      "latency_ms": 1353.2,
+      "cost_usd": 0.002672574
+    },
+    {
+      "id": "g010",
+      "type": "abstain",
+      "config": "hybrid",
+      "status": "ok",
+      "error": "",
+      "abstained": true,
+      "should_abstain": true,
+      "recall_at_5": null,
+      "recall_at_10": null,
+      "mrr": null,
+      "markers": [],
+      "supplied": 8,
+      "cited_docs": [],
+      "expected_docs": [],
+      "faithfulness": null,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 1441.4,
+      "cost_usd": 0.001387384
+    },
+    {
+      "id": "g011",
+      "type": "superseded",
+      "config": "hybrid",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [
+        "C2",
+        "C4",
+        "C1",
+        "C3",
+        "C6"
+      ],
+      "supplied": 8,
+      "cited_docs": [
+        "gst-195-07-2023",
+        "gst-195-07-2023",
+        "gst-216-10-2024",
+        "gst-216-10-2024",
+        "gst-216-10-2024"
+      ],
+      "expected_docs": [
+        "gst-216-10-2024",
+        "gst-195-07-2023"
+      ],
+      "faithfulness": 1.0,
+      "judge_failed": false,
+      "has_notes": true,
+      "must_flag": true,
+      "latency_ms": 3102.1,
+      "cost_usd": 0.0037130180000000002
+    },
+    {
+      "id": "g012",
+      "type": "superseded",
+      "config": "hybrid",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [
+        "C1",
+        "C3",
+        "C2",
+        "C5",
+        "C6",
+        "C7",
+        "C4",
+        "C8"
+      ],
+      "supplied": 8,
+      "cited_docs": [
+        "gst-237-31-2024",
+        "gst-237-31-2024",
+        "gst-237-31-2024",
+        "gst-237-31-2024",
+        "gst-237-31-2024",
+        "gst-237-31-2024",
+        "gst-237-31-2024",
+        "gst-237-31-2024"
+      ],
+      "expected_docs": [
+        "gst-237-31-2024",
+        "gst-237-31-2024-corr"
+      ],
+      "faithfulness": 0.8333333333333334,
+      "judge_failed": false,
+      "has_notes": true,
+      "must_flag": true,
+      "latency_ms": 2504.9,
+      "cost_usd": 0.0038616419999999998
+    },
+    {
+      "id": "g013",
+      "type": "superseded",
+      "config": "hybrid",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [
+        "C4",
+        "C1",
+        "C5"
+      ],
+      "supplied": 6,
+      "cited_docs": [
+        "rbi-12799",
+        "rbi-11959",
+        "rbi-12799"
+      ],
+      "expected_docs": [
+        "rbi-11959",
+        "rbi-12799"
+      ],
+      "faithfulness": 0.6666666666666666,
+      "judge_failed": false,
+      "has_notes": true,
+      "must_flag": true,
+      "latency_ms": 5213.9,
+      "cost_usd": 0.0067940959999999995
+    },
+    {
+      "id": "g014",
+      "type": "abstain",
+      "config": "hybrid",
+      "status": "ok",
+      "error": "",
+      "abstained": true,
+      "should_abstain": true,
+      "recall_at_5": null,
+      "recall_at_10": null,
+      "mrr": null,
+      "markers": [],
+      "supplied": 8,
+      "cited_docs": [],
+      "expected_docs": [],
+      "faithfulness": null,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 4272.7,
+      "cost_usd": 0.001231754
+    },
+    {
+      "id": "g015",
+      "type": "abstain",
+      "config": "hybrid",
+      "status": "ok",
+      "error": "",
+      "abstained": true,
+      "should_abstain": true,
+      "recall_at_5": null,
+      "recall_at_10": null,
+      "mrr": null,
+      "markers": [],
+      "supplied": 8,
+      "cited_docs": [],
+      "expected_docs": [],
+      "faithfulness": null,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 4942.4,
+      "cost_usd": 0.001283084
+    },
+    {
+      "id": "g016",
+      "type": "cross_corpus",
+      "config": "hybrid",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [
+        "C1",
+        "C2",
+        "C4",
+        "C3",
+        "C7",
+        "C8"
+      ],
+      "supplied": 8,
+      "cited_docs": [
+        "gst-225-19-2024",
+        "gst-225-19-2024",
+        "gst-204-16-2023",
+        "gst-225-19-2024",
+        "rbi-12957",
+        "rbi-12957"
+      ],
+      "expected_docs": [
+        "gst-225-19-2024",
+        "gst-204-16-2023",
+        "rbi-12957"
+      ],
+      "faithfulness": 1.0,
+      "judge_failed": false,
+      "has_notes": true,
+      "must_flag": false,
+      "latency_ms": 1939.0,
+      "cost_usd": 0.0045672379999999995
+    },
+    {
+      "id": "g017",
+      "type": "cross_corpus",
+      "config": "hybrid",
+      "status": "ok",
+      "error": "",
+      "abstained": true,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [],
+      "supplied": 8,
+      "cited_docs": [],
+      "expected_docs": [
+        "rbi-13139",
+        "gst-210-04-2024"
+      ],
+      "faithfulness": null,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 2270.0,
+      "cost_usd": 0.001326894
+    },
+    {
+      "id": "g018",
+      "type": "factual",
+      "config": "hybrid",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [
+        "C1",
+        "C3",
+        "C6",
+        "C7",
+        "C2",
+        "C5",
+        "C4"
+      ],
+      "supplied": 8,
+      "cited_docs": [
+        "rbi-10192",
+        "rbi-10192",
+        "rbi-10192",
+        "rbi-10192",
+        "rbi-10192",
+        "rbi-10192",
+        "rbi-10192"
+      ],
+      "expected_docs": [
+        "rbi-10192"
+      ],
+      "faithfulness": 1.0,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 3844.2,
+      "cost_usd": 0.003057502
+    },
+    {
+      "id": "g019",
+      "type": "factual",
+      "config": "hybrid",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [
+        "C1",
+        "C3",
+        "C2"
+      ],
+      "supplied": 8,
+      "cited_docs": [
+        "gst-246-03-2025",
+        "gst-246-03-2025",
+        "gst-246-03-2025"
+      ],
+      "expected_docs": [
+        "gst-246-03-2025"
+      ],
+      "faithfulness": 1.0,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 3336.1,
+      "cost_usd": 0.00370418
+    },
+    {
+      "id": "g020",
+      "type": "table",
+      "config": "hybrid",
+      "status": "ok",
+      "error": "",
+      "abstained": true,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [],
+      "supplied": 8,
+      "cited_docs": [],
+      "expected_docs": [
+        "rbi-12156"
+      ],
+      "faithfulness": null,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 3873.4,
+      "cost_usd": 0.0026800059999999995
+    },
+    {
+      "id": "g001",
+      "type": "factual",
+      "config": "hybrid_rerank",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [
+        "C1",
+        "C2",
+        "C3",
+        "C4",
+        "C5"
+      ],
+      "supplied": 8,
+      "cited_docs": [
+        "rbi-13141",
+        "rbi-13141",
+        "rbi-12943",
+        "rbi-13141",
+        "rbi-13140"
+      ],
+      "expected_docs": [
+        "rbi-13141"
+      ],
+      "faithfulness": 1.0,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 3429.2,
+      "cost_usd": 0.00473288
+    },
+    {
+      "id": "g002",
+      "type": "table",
+      "config": "hybrid_rerank",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [
+        "C1",
+        "C3"
+      ],
+      "supplied": 8,
+      "cited_docs": [
+        "rbi-12156",
+        "rbi-12156"
+      ],
+      "expected_docs": [
+        "rbi-12156"
+      ],
+      "faithfulness": 1.0,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 24599.2,
+      "cost_usd": 0.004294158
+    },
+    {
+      "id": "g003",
+      "type": "factual",
+      "config": "hybrid_rerank",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [
+        "C1",
+        "C2",
+        "C4",
+        "C3",
+        "C7",
+        "C8"
+      ],
+      "supplied": 8,
+      "cited_docs": [
+        "rbi-12898",
+        "rbi-12898",
+        "rbi-12898",
+        "rbi-12898",
+        "rbi-13642",
+        "rbi-13642"
+      ],
+      "expected_docs": [
+        "rbi-12898"
+      ],
+      "faithfulness": 1.0,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 29201.8,
+      "cost_usd": 0.004741612
+    },
+    {
+      "id": "g004",
+      "type": "factual",
+      "config": "hybrid_rerank",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [
+        "C2",
+        "C4",
+        "C6",
+        "C7",
+        "C8"
+      ],
+      "supplied": 8,
+      "cited_docs": [
+        "gst-231-25-2024",
+        "gst-231-25-2024",
+        "gst-231-25-2024",
+        "gst-231-25-2024",
+        "gst-231-25-2024"
+      ],
+      "expected_docs": [
+        "gst-231-25-2024"
+      ],
+      "faithfulness": 1.0,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 28938.2,
+      "cost_usd": 0.006435562
+    },
+    {
+      "id": "g005",
+      "type": "factual",
+      "config": "hybrid_rerank",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [
+        "C1",
+        "C2",
+        "C3",
+        "C4",
+        "C5",
+        "C6",
+        "C7",
+        "C8"
+      ],
+      "supplied": 8,
+      "cited_docs": [
+        "gst-232-26-2024",
+        "gst-232-26-2024",
+        "gst-232-26-2024",
+        "gst-232-26-2024",
+        "gst-232-26-2024",
+        "gst-232-26-2024",
+        "gst-232-26-2024",
+        "gst-232-26-2024"
+      ],
+      "expected_docs": [
+        "gst-232-26-2024"
+      ],
+      "faithfulness": 1.0,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 25699.3,
+      "cost_usd": 0.004846106
+    },
+    {
+      "id": "g006",
+      "type": "factual",
+      "config": "hybrid_rerank",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [
+        "C1",
+        "C2"
+      ],
+      "supplied": 8,
+      "cited_docs": [
+        "gst-198-10-2023",
+        "gst-198-10-2023"
+      ],
+      "expected_docs": [
+        "gst-198-10-2023"
+      ],
+      "faithfulness": 0.75,
+      "judge_failed": false,
+      "has_notes": true,
+      "must_flag": false,
+      "latency_ms": 27949.5,
+      "cost_usd": 0.0032040539999999996
+    },
+    {
+      "id": "g007",
+      "type": "cross_corpus",
+      "config": "hybrid_rerank",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [
+        "C3",
+        "C8"
+      ],
+      "supplied": 8,
+      "cited_docs": [
+        "gst-220-14-2024",
+        "rbi-13141"
+      ],
+      "expected_docs": [
+        "gst-220-14-2024",
+        "rbi-13141"
+      ],
+      "faithfulness": 1.0,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 31006.4,
+      "cost_usd": 0.004338196
+    },
+    {
+      "id": "g008",
+      "type": "cross_corpus",
+      "config": "hybrid_rerank",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [
+        "C1",
+        "C2",
+        "C3",
+        "C4",
+        "C5",
+        "C6",
+        "C7",
+        "C8"
+      ],
+      "supplied": 8,
+      "cited_docs": [
+        "gst-243-37-2024",
+        "gst-243-37-2024",
+        "gst-243-37-2024",
+        "gst-243-37-2024",
+        "gst-243-37-2024",
+        "gst-243-37-2024",
+        "gst-243-37-2024",
+        "gst-243-37-2024"
+      ],
+      "expected_docs": [
+        "gst-243-37-2024",
+        "rbi-12156"
+      ],
+      "faithfulness": 1.0,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 26246.9,
+      "cost_usd": 0.006025778000000001
+    },
+    {
+      "id": "g009",
+      "type": "superseded",
+      "config": "hybrid_rerank",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [
+        "C2"
+      ],
+      "supplied": 3,
+      "cited_docs": [
+        "rbi-12799"
+      ],
+      "expected_docs": [
+        "rbi-12799",
+        "rbi-11959"
+      ],
+      "faithfulness": 0.5,
+      "judge_failed": false,
+      "has_notes": true,
+      "must_flag": true,
+      "latency_ms": 26149.0,
+      "cost_usd": 0.002455624
+    },
+    {
+      "id": "g010",
+      "type": "abstain",
+      "config": "hybrid_rerank",
+      "status": "ok",
+      "error": "",
+      "abstained": true,
+      "should_abstain": true,
+      "recall_at_5": null,
+      "recall_at_10": null,
+      "mrr": null,
+      "markers": [],
+      "supplied": 8,
+      "cited_docs": [],
+      "expected_docs": [],
+      "faithfulness": null,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 28717.7,
+      "cost_usd": 0.002018934
+    },
+    {
+      "id": "g011",
+      "type": "superseded",
+      "config": "hybrid_rerank",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [
+        "C2",
+        "C6",
+        "C7",
+        "C8"
+      ],
+      "supplied": 8,
+      "cited_docs": [
+        "gst-195-07-2023",
+        "gst-216-10-2024",
+        "gst-216-10-2024",
+        "gst-216-10-2024"
+      ],
+      "expected_docs": [
+        "gst-216-10-2024",
+        "gst-195-07-2023"
+      ],
+      "faithfulness": 0.75,
+      "judge_failed": false,
+      "has_notes": true,
+      "must_flag": true,
+      "latency_ms": 38478.6,
+      "cost_usd": 0.004847418000000001
+    },
+    {
+      "id": "g012",
+      "type": "superseded",
+      "config": "hybrid_rerank",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [
+        "C1",
+        "C8",
+        "C2",
+        "C3",
+        "C4",
+        "C7",
+        "C5",
+        "C6"
+      ],
+      "supplied": 8,
+      "cited_docs": [
+        "gst-237-31-2024",
+        "gst-237-31-2024",
+        "gst-237-31-2024",
+        "gst-237-31-2024",
+        "gst-237-31-2024",
+        "gst-237-31-2024",
+        "gst-237-31-2024",
+        "gst-237-31-2024"
+      ],
+      "expected_docs": [
+        "gst-237-31-2024",
+        "gst-237-31-2024-corr"
+      ],
+      "faithfulness": 0.8333333333333334,
+      "judge_failed": false,
+      "has_notes": true,
+      "must_flag": true,
+      "latency_ms": 21234.9,
+      "cost_usd": 0.0065734420000000005
+    },
+    {
+      "id": "g013",
+      "type": "superseded",
+      "config": "hybrid_rerank",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [
+        "C1",
+        "C2",
+        "C3",
+        "C5"
+      ],
+      "supplied": 5,
+      "cited_docs": [
+        "rbi-11959",
+        "rbi-12799",
+        "rbi-12799",
+        "rbi-12799"
+      ],
+      "expected_docs": [
+        "rbi-11959",
+        "rbi-12799"
+      ],
+      "faithfulness": 1.0,
+      "judge_failed": false,
+      "has_notes": true,
+      "must_flag": true,
+      "latency_ms": 25184.4,
+      "cost_usd": 0.003553496
+    },
+    {
+      "id": "g014",
+      "type": "abstain",
+      "config": "hybrid_rerank",
+      "status": "ok",
+      "error": "",
+      "abstained": true,
+      "should_abstain": true,
+      "recall_at_5": null,
+      "recall_at_10": null,
+      "mrr": null,
+      "markers": [],
+      "supplied": 8,
+      "cited_docs": [],
+      "expected_docs": [],
+      "faithfulness": null,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 44085.1,
+      "cost_usd": 0.002470104
+    },
+    {
+      "id": "g015",
+      "type": "abstain",
+      "config": "hybrid_rerank",
+      "status": "ok",
+      "error": "",
+      "abstained": true,
+      "should_abstain": true,
+      "recall_at_5": null,
+      "recall_at_10": null,
+      "mrr": null,
+      "markers": [],
+      "supplied": 8,
+      "cited_docs": [],
+      "expected_docs": [],
+      "faithfulness": null,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 13903.7,
+      "cost_usd": 0.0020556339999999998
+    },
+    {
+      "id": "g016",
+      "type": "cross_corpus",
+      "config": "hybrid_rerank",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [
+        "C1",
+        "C2",
+        "C3",
+        "C4",
+        "C8"
+      ],
+      "supplied": 8,
+      "cited_docs": [
+        "gst-225-19-2024",
+        "gst-225-19-2024",
+        "gst-204-16-2023",
+        "gst-204-16-2023",
+        "rbi-12957"
+      ],
+      "expected_docs": [
+        "gst-225-19-2024",
+        "gst-204-16-2023",
+        "rbi-12957"
+      ],
+      "faithfulness": 1.0,
+      "judge_failed": false,
+      "has_notes": true,
+      "must_flag": false,
+      "latency_ms": 33244.6,
+      "cost_usd": 0.007469838
+    },
+    {
+      "id": "g017",
+      "type": "cross_corpus",
+      "config": "hybrid_rerank",
+      "status": "ok",
+      "error": "",
+      "abstained": true,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [],
+      "supplied": 8,
+      "cited_docs": [],
+      "expected_docs": [
+        "rbi-13139",
+        "gst-210-04-2024"
+      ],
+      "faithfulness": null,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 27487.5,
+      "cost_usd": 0.004855043999999999
+    },
+    {
+      "id": "g018",
+      "type": "factual",
+      "config": "hybrid_rerank",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [
+        "C1",
+        "C2",
+        "C3",
+        "C4",
+        "C5",
+        "C7",
+        "C8"
+      ],
+      "supplied": 8,
+      "cited_docs": [
+        "rbi-10192",
+        "rbi-10192",
+        "rbi-10192",
+        "rbi-10192",
+        "rbi-10192",
+        "rbi-10192",
+        "rbi-10192"
+      ],
+      "expected_docs": [
+        "rbi-10192"
+      ],
+      "faithfulness": 1.0,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 28095.8,
+      "cost_usd": 0.003411702
+    },
+    {
+      "id": "g019",
+      "type": "factual",
+      "config": "hybrid_rerank",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [
+        "C1",
+        "C3",
+        "C4"
+      ],
+      "supplied": 8,
+      "cited_docs": [
+        "gst-246-03-2025",
+        "gst-246-03-2025",
+        "gst-246-03-2025"
+      ],
+      "expected_docs": [
+        "gst-246-03-2025"
+      ],
+      "faithfulness": 1.0,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 28561.1,
+      "cost_usd": 0.00436453
+    },
+    {
+      "id": "g020",
+      "type": "table",
+      "config": "hybrid_rerank",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [
+        "C1",
+        "C7"
+      ],
+      "supplied": 8,
+      "cited_docs": [
+        "rbi-12156",
+        "rbi-12156"
+      ],
+      "expected_docs": [
+        "rbi-12156"
+      ],
+      "faithfulness": 1.0,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 27562.8,
+      "cost_usd": 0.002979256
+    }
+  ]
+}

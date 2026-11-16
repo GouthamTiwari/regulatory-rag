@@ -30,3 +30,4 @@ One line per merged task: date | task | summary.
 - 2026-11-16 | 14 ingest run | all 65 documents stored (2,265 chunks with vectors, $0.016 total); manifest sha256 filled; re-run skips all at $0
 - 2026-11-16 | 22 query-pipeline | answer_question + CLI end to end; abstain threshold calibrated to 0.01 (17/17 answerable hit@1); rerank paced to the 2/min quota; supersession replacement found by rule; first live answers
 - 2026-11-16 | 25 judge | per-sentence supported/unsupported JSON judge, strict parsing, one retry, None (not 0) on failure; model-agnostic
+- 2026-11-16 | 26 eval-runner | 4-way eval runner + report; sample on 20 seed questions: retrieval saturated at doc level, configs differ in wrong abstentions (keyword 0.65 -> vector 1.00), $0.26
