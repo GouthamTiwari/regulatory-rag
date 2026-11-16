@@ -17,3 +17,4 @@ One line per merged task: date | task | summary.
 - 2026-11-16 | 21 validator | citation validator (unknown markers, uncited rule sentences), validator chain, abstain decision (weak/insufficient/invalid)
 - 2026-11-16 | 23 golden-set | strict JSONL loader (stable schema, extras kept) and 20 unreviewed seed questions across all 5 types
 - 2026-11-16 | 24 metrics | recall@k, MRR, citation validity/accuracy, abstention P/R, flag rate, p95 latency (None when undefined)
+- 2026-11-16 | 10 embedder | Titan V2 embedder (4 parallel calls, order kept, retries); live: 0.42 s from Mumbai
