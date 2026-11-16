@@ -15,3 +15,4 @@ One line per merged task: date | task | summary.
 - 2026-11-16 | 09 supersession | operative-phrase + reference extraction (boilerplate-proof), repeal/consolidation tables; 61 relations on corpus, 5 of 7 manual links recovered
 - 2026-11-16 | 17 rrf-hybrid | rrf_fuse (k=60, rank-based, repeatable ties) and HybridRetriever over any two retrievers
 - 2026-11-16 | 21 validator | citation validator (unknown markers, uncited rule sentences), validator chain, abstain decision (weak/insufficient/invalid)
+- 2026-11-16 | 23 golden-set | strict JSONL loader (stable schema, extras kept) and 20 unreviewed seed questions across all 5 types
