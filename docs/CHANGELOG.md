@@ -18,3 +18,4 @@ One line per merged task: date | task | summary.
 - 2026-11-16 | 23 golden-set | strict JSONL loader (stable schema, extras kept) and 20 unreviewed seed questions across all 5 types
 - 2026-11-16 | 24 metrics | recall@k, MRR, citation validity/accuracy, abstention P/R, flag rate, p95 latency (None when undefined)
 - 2026-11-16 | 10 embedder | Titan V2 embedder (4 parallel calls, order kept, retries); live: 0.42 s from Mumbai
+- 2026-11-16 | 11 reranker | BedrockReranker via InvokeModel (format verified live), NoopReranker; note: Amazon Rerank scores run low (~0.2 for a clear match)
