@@ -41,7 +41,7 @@ Branch: task/09-supersession | Date: 2026-11-16
   - repeal-list table extraction; an ordinary table ignored; evidence, flags and de-duplication;
   - 5 GST spelling variants plus RBI and department normalisation; `find_refs` order and de-duplication; the sentence splitter;
   - 3 regressions from the corpus run: the corrigendum target, "(as amended by …)" history, and "earlier modified vide Para 5 of …".
-- Full suite: 191 passed (+ 9 db), 0 failed.
+- Full suite: 188 passed (+ 9 db), 0 failed.
 
 ## Out of scope / follow-ups
 - Resolving `to_doc_ref` to `to_doc_id` (when the target is in our corpus) is Task 13.
