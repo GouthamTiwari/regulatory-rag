@@ -30,3 +30,15 @@ Branch: task/27-golden-drafts | Date: 2026-11-16
 
 ## Review log
 - Self-review: passed for part 1. Drafts were spot-checked: they're specific, answerable from the cited passage, and have correct section and page.
+
+## Part 2: review and accept (2026-11-16)
+- Goutham couldn't open Excel and asked the assistant to do the review, so **the review was done by the AI assistant, not a human**. Every accepted row is tagged `assistant-reviewed`, and the README says so.
+- **How it was checked:**
+  1. All 20 seeds and the 8 hand-written questions were kept. Their expected documents come from the manifest and the evidence-backed relations.
+  2. Each drafted row was kept only if ≥ 60% of the answer's content words appear in the excerpt and its question isn't a near-duplicate (word overlap < 0.6) of one already kept.
+  3. The 16 rows flagged by step 2 were re-checked against the **full passage** from the database (the excerpt is only 700 characters): 14 kept (≥ 70% support), **2 dropped** (41% and 56% support).
+- **Result:** `data/golden/golden.jsonl` has **61 reviewed rows**:
+  - by type: 38 factual, 4 table, 5 cross-corpus, 7 superseded, 7 abstain;
+  - by corpus: 24 RBI, 26 GST, 5 both, 6 none;
+  - 33 rows carry section-level gold.
+- **Tests:** the accept test now builds its own small golden file. A new test checks the committed set is ≥ 60 rows, all reviewed and all tagged. The `--check` test expects 61 rows. Full suite: 335 passed.

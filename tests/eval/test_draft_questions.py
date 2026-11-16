@@ -2,9 +2,7 @@
 
 import csv
 import json
-import shutil
 from collections import Counter
-from pathlib import Path
 
 import pytest
 
@@ -84,7 +82,16 @@ def test_unusable_drafts_are_rejected(reply):
 
 def test_accept_writes_only_kept_rows_validated_and_reviewed(tmp_path):
     golden = tmp_path / "golden.jsonl"
-    shutil.copy(GOLDEN_PATH, golden)
+    seed = {
+        "schema_version": 1, "corpus": "rbi", "type": "factual", "expected_sections": [],
+        "reference_answer": "TODO", "should_abstain": False, "must_flag_supersession": False,
+        "tags": [], "source": "manual", "reviewed": False,
+    }  # fmt: skip
+    first = {**seed, "id": "g001", "question": "Which documents are OVDs for KYC?",
+             "expected_doc_ids": ["rbi-13141"]}  # fmt: skip
+    second = {**seed, "id": "g002", "question": "What is the small PPI loading limit?",
+              "expected_doc_ids": ["rbi-12156"]}  # fmt: skip
+    golden.write_text(json.dumps(first) + "\n" + json.dumps(second) + "\n", encoding="utf-8")
     rows = existing_rows(golden) + handwritten_rows()
     rows += draft_rows(
         [make_chunk(1, doc_id="gst-231-25-2024", corpus="gst", section_no="Para 4", page_start=2)],
@@ -94,15 +101,15 @@ def test_accept_writes_only_kept_rows_validated_and_reviewed(tmp_path):
     rows[0]["keep"] = "Y"  # an existing seed question
     rows[0]["reference_answer"] = "Passport, driving licence, Aadhaar, voter ID and others."
     rows[-1]["keep"] = "y"  # the drafted one
-    rows[20 + 4]["keep"] = "Yes"  # a hand-written abstain question
+    rows[2 + 4]["keep"] = "Yes"  # a hand-written abstain question
     review = tmp_path / "review.csv"
     write_review(review, rows)
 
     kept, total = accept(review, golden)
-    assert kept == 3 and total == 22  # 20 seeds + 2 new; the seed was updated, not duplicated
+    assert kept == 3 and total == 4  # 2 seeds + 2 new; the seed was updated, not duplicated
     items = {i.id: i for i in load_golden(golden, include_unreviewed=True)}
     assert items["g001"].reviewed and items["g001"].reference_answer.startswith("Passport")
-    new = [i for i in items.values() if i.id in ("g021", "g022")]
+    new = [i for i in items.values() if i.id in ("g003", "g004")]
     assert all(i.reviewed for i in new)
     drafted = next(i for i in new if i.source == "llm_drafted")
     assert drafted.expected_sections == [
@@ -125,6 +132,7 @@ def test_handwritten_questions_point_at_real_documents():
         assert bool(h.get("should_abstain")) == (h["type"] == "abstain")
 
 
-def test_golden_file_is_untouched_by_tests():
-    lines = Path(GOLDEN_PATH).read_text(encoding="utf-8").splitlines()
-    assert len(lines) == 20 and all(json.loads(line)["reviewed"] is False for line in lines)
+def test_committed_golden_set_is_reviewed_and_large_enough():
+    items = load_golden(GOLDEN_PATH, include_unreviewed=True)
+    assert len(items) >= 60 and all(i.reviewed for i in items)
+    assert all("assistant-reviewed" in i.tags for i in items)  # honest provenance

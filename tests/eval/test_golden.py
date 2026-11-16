@@ -93,4 +93,4 @@ def test_committed_seed_file_is_valid():
 
 def test_check_command_exits_zero(capsys):
     assert main(["--check"]) == 0
-    assert "Rows: 20" in capsys.readouterr().out
+    assert "Rows: 61" in capsys.readouterr().out
