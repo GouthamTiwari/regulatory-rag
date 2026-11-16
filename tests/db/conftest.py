@@ -39,6 +39,10 @@ def db_schema():
 def db_conn(db_schema) -> psycopg.Connection:
     """A connection inside the test schema. Everything a test does is rolled back after it."""
     conn = connect(schema=db_schema)
+    # Open the outer transaction now. Why: code under test uses `conn.transaction()`, which
+    # on an idle connection would start (and commit!) a real transaction. With one already
+    # open it becomes a savepoint instead, so the rollback below undoes everything.
+    conn.execute("SELECT 1")
     try:
         yield conn
     finally:

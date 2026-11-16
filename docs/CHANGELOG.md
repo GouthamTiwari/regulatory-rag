@@ -20,3 +20,4 @@ One line per merged task: date | task | summary.
 - 2026-11-16 | 10 embedder | Titan V2 embedder (4 parallel calls, order kept, retries); live: 0.42 s from Mumbai
 - 2026-11-16 | 11 reranker | BedrockReranker via InvokeModel (format verified live), NoopReranker; note: Amazon Rerank scores run low (~0.2 for a clear match)
 - 2026-11-16 | 12 llm | BedrockLLM over Converse (text blocks only, usage, retries, temperature 0); live: Nova 2 Lite 0.93 s, $0.00015
+- 2026-11-16 | 13 repository | transactional document/chunk upsert, relations (both directions, ref -> doc_id), nearest chunk, query logs; fixed db test isolation
