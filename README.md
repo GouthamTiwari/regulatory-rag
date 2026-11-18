@@ -110,12 +110,20 @@ uv run python -m regrag.ingest.pipeline --skip-download                 # parse,
 
 ## Usage
 
+**Web page** (opens http://localhost:8501): ask a question, pick one of the four search setups, and see the answer with source cards, supersession warnings, time and cost.
+
+```powershell
+uv run streamlit run src/regrag/ui/app.py
+```
+
+**Command line:**
+
 ```powershell
 uv run python -m regrag.query "Can a car dealer claim input tax credit on demo vehicles?"
 uv run python -m regrag.query "..." --config hybrid       # bm25 | vector | hybrid | hybrid_rerank
 uv run python -m regrag.query "..." --json                # full result: citations, usage, latency
 uv run python -m regrag.eval --include-unreviewed --sample  # 4-way evaluation → docs/eval/
-uv run pytest                                            # 335 unit tests, no AWS or Docker needed
+uv run pytest                                            # 342 unit tests, no AWS or Docker needed
 ```
 
 ## Design decisions
@@ -145,6 +153,7 @@ src/regrag/
   retrieval/  keyword, vector, fusion, hybrid
   query/      router, supersession, prompts, generate, validate, querylog, pipeline, CLI
   eval/       golden, metrics, judge, run
+  ui/         Streamlit web page (app) + testable display helpers (view)
 data/         manifest.csv, relations.csv, golden/golden.jsonl  (raw PDFs gitignored)
 docs/         SPEC.md, TASKS.md, CHANGELOG.md, changelogs/, eval/
 ```
@@ -157,7 +166,7 @@ The full specification is in [`docs/SPEC.md`](docs/SPEC.md), the task breakdown 
 - No OCR: 2 near-empty scanned pages are skipped.
 - Extracted supersession links await human review; only the 7 hand-checked links drive warnings.
 - Some section labels are imperfect (e.g. "Appendix, para 7.1" in the 2025 PSL directions).
-- Command line only for now; a small web UI is planned.
+- The web page is for local, single-user use (one question at a time; no login).
 
 ## Disclaimer
 

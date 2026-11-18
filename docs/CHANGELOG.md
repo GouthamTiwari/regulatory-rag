@@ -35,3 +35,4 @@ One line per merged task: date | task | summary.
 - 2026-11-16 | 27 golden-drafts (part 1) | draft questions from sampled passages with section-level gold + 8 hand-written; one Excel review sheet; accept writes kept rows as reviewed
 - 2026-11-16 | 27 golden set (part 2) | 61 reviewed questions (assistant-reviewed, tagged), 33 with section-level gold; 2 weakly supported drafts dropped
 - 2026-11-16 | 28 final-eval | 61 questions x 4 configs, Nova Pro judge, $0.94: hybrid+rerank best retrieval (MRR 0.93), all should-refuse refused; README updated
+- 2026-11-18 | 30 web-ui | Streamlit page: examples, 4 search setups, answer + source cards + superseded badge, refusal reason, time/cost; display helpers unit-tested, page smoke-tested with AppTest

@@ -366,3 +366,12 @@ If a builder finds it needs a new dependency, a new setting or a change to a typ
   - The Mermaid block renders on GitHub.
   - The numbers in the README table equal those in `docs/eval/results.md`, and the keyword row uses the label "keyword (Postgres FTS, BM25-like)".
   - No secret, account ID, employer name or personal detail appears anywhere in the file.
+
+## Task 30: Web page (added after v1)
+
+- **Files:** N `src/regrag/ui/__init__.py`, `src/regrag/ui/view.py`, `src/regrag/ui/app.py`, `tests/ui/`; E `pyproject.toml`, `uv.lock`, `.gitignore`, `README.md`, `docs/SPEC.md` (non-goal line).
+- **Depends on:** 22. **Scope change:** agreed by the owner on 2026-11-16 ("Web UI is something that we can add later on").
+- **Do:** A Streamlit page that calls `answer_question()`: question box, example questions, search-setup dropdown (the four eval configs), the answer, a refusal warning with a plain reason, supersession notes, source cards (title, section, pages, official link, "superseded" badge), and time/cost. Display logic lives in a Streamlit-free module so it can be unit-tested.
+- **Acceptance:**
+  - `uv run streamlit run src/regrag/ui/app.py` answers a real question with sources.
+  - Unit tests cover the display helpers and run the page with the pipeline mocked (no AWS, no Docker).

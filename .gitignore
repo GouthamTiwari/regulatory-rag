@@ -17,3 +17,4 @@ data/raw/
 
 # Local agent worktrees (never part of the repo)
 .claude/worktrees/
+.claude/launch.json

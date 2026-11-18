@@ -514,7 +514,7 @@ Each runnable stage has its own entry point (`uv run python -m regrag.ingest.pip
 
 ## 9. Non-goals for v1
 
-- No web UI and no HTTP API. Command line only.
+- No HTTP API. Command line only in v1; a small Streamlit web page was added after v1 (Task 30, agreed with the owner 2026-11-16).
 - No OCR for scanned PDFs; no Hindi or bilingual documents.
 - No GST notifications, rate schedules, Acts or Rules; circulars only. No RBI FAQs or press releases.
 - No GST circulars numbered 251 or above (late 2025 and 2026). Follow-up: add them once an official listing is confirmed.
