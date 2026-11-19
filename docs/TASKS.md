@@ -375,3 +375,9 @@ If a builder finds it needs a new dependency, a new setting or a change to a typ
 - **Acceptance:**
   - `uv run streamlit run src/regrag/ui/app.py` answers a real question with sources.
   - Unit tests cover the display helpers and run the page with the pipeline mocked (no AWS, no Docker).
+
+## Task 31: Spell out abbreviations (added after v1)
+
+- **Files:** N `src/regrag/query/abbreviations.py`, `tests/query/test_abbreviations.py`; E `src/regrag/query/pipeline.py`, `README.md`.
+- **Why:** "What is RCM?" was refused (top rerank score 0.0051 < 0.01, routed to both) although 5 GST circulars cover reverse charge.
+- **Acceptance:** "What is RCM?" routes to GST and gets a cited answer; the result keeps the question as typed; unit tests need no AWS or Docker.

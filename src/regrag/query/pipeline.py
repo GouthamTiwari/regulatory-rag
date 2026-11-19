@@ -16,6 +16,7 @@ from dataclasses import dataclass, field
 from regrag.bedrock.pricing import cost_usd
 from regrag.config import Settings, get_settings
 from regrag.db import repository as repo
+from regrag.query.abbreviations import expand_abbreviations
 from regrag.query.querylog import record
 from regrag.query.supersession import apply_supersession
 from regrag.query.validate import CitationValidator, decide_abstain, run_validators
@@ -173,6 +174,8 @@ def answer_question(
     s = parts.settings
     latency: dict[str, float] = {}
     usage = Usage()
+    # Every stage sees the spelled-out question; the result keeps what the user typed.
+    expanded = expand_abbreviations(question)
 
     def timed(stage: str, fn, *args):
         start = time.perf_counter()
@@ -180,25 +183,25 @@ def answer_question(
         latency[stage] = round((time.perf_counter() - start) * 1000, 1)
         return value
 
-    route = timed("route", parts.router.route, question)
+    route = timed("route", parts.router.route, expanded)
     usage += getattr(parts.router, "last_usage", Usage())
 
-    retrieved = timed("retrieve", parts.retriever.retrieve, question, route, s.fused_top_k)
+    retrieved = timed("retrieve", parts.retriever.retrieve, expanded, route, s.fused_top_k)
     usage.embed_tokens += _embed_tokens(parts.retriever)
 
-    reranked = timed("rerank", parts.reranker.rerank, question, retrieved, s.rerank_top_n)
+    reranked = timed("rerank", parts.reranker.rerank, expanded, retrieved, s.rerank_top_n)
     usage.rerank_queries += getattr(parts.reranker, "last_queries", 0)
     top_score = reranked[0].rerank_score if reranked and config.uses_rerank else None
 
-    shown, notes = timed("supersession", _supersession, parts, question, reranked, usage)
+    shown, notes = timed("supersession", _supersession, parts, expanded, reranked, usage)
 
-    draft: DraftAnswer = timed("generate", parts.generator.generate, question, shown)
+    draft: DraftAnswer = timed("generate", parts.generator.generate, expanded, shown)
     usage += draft.usage
-    validation = run_validators(parts.validators, question, draft, shown)
+    validation = run_validators(parts.validators, expanded, draft, shown)
     if not validation.passed and not draft.insufficient:
-        draft = timed("regenerate", parts.retry_generator.generate, question, shown)
+        draft = timed("regenerate", parts.retry_generator.generate, expanded, shown)
         usage += draft.usage
-        validation = run_validators(parts.validators, question, draft, shown)
+        validation = run_validators(parts.validators, expanded, draft, shown)
 
     abstained, reason = decide_abstain(top_score, draft, validation, s.abstain_threshold)
     result = QueryResult(

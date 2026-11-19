@@ -123,7 +123,7 @@ uv run python -m regrag.query "Can a car dealer claim input tax credit on demo v
 uv run python -m regrag.query "..." --config hybrid       # bm25 | vector | hybrid | hybrid_rerank
 uv run python -m regrag.query "..." --json                # full result: citations, usage, latency
 uv run python -m regrag.eval --include-unreviewed --sample  # 4-way evaluation → docs/eval/
-uv run pytest                                            # 342 unit tests, no AWS or Docker needed
+uv run pytest                                            # 350 unit tests, no AWS or Docker needed
 ```
 
 ## Design decisions
@@ -134,6 +134,7 @@ uv run pytest                                            # 342 unit tests, no AW
 - **Postgres for both searches.** One database, no extra service: pgvector (HNSW, cosine) for meaning, built-in full-text search (GIN) for keywords. The keyword leg is labelled honestly as *BM25-like*, not BM25.
 - **Rerank via `InvokeModel`.** Bedrock API keys can't call the agent-runtime Rerank API, so the reranker uses `bedrock-runtime` with a small adapter per model.
 - **Supersession, precision first.** Links between documents come from a hand-checked file, each with quoted evidence, plus text extraction that accepts only *operative* phrases ("stands withdrawn", "in supersession of"), never boilerplate ("as amended from time to time" appeared 134 times). Only reviewed links trigger warnings. When an outdated passage is retrieved, the system brings in the passage of the newer document that covers *the same rule* (vector similarity between passages), so the current rule is cited from the right document.
+- **Abbreviations spelled out before search.** "What is RCM?" was refused: the bare abbreviation scored just under the abstain threshold and the router couldn't tell it was GST. A small glossary (only abbreviations that appear in the corpus with one meaning) turns it into "RCM (reverse charge mechanism)" for routing, search and generation; the answer still shows the question as typed.
 - **Abstain instead of guess.** The answer must cite only supplied passages (checked in code), and the system refuses when the best rerank score is below a threshold **calibrated on real scores** (0.01), not guessed.
 - **Built for a small AWS quota.** New-account quotas were 1% of the defaults (Titan 60 requests/min, Rerank 2/min). Bursts were throttled and botocore's adaptive retry mode froze. Calls are now **paced** below the quota, which gave zero throttling.
 - **Section-aware chunking.** Chunks follow chapters, sub-headings and numbered paragraphs, never cross a chapter, keep tables whole (as Markdown, with captions), and carry the section number and pages used in citations.
