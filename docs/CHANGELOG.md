@@ -37,3 +37,4 @@ One line per merged task: date | task | summary.
 - 2026-11-16 | 28 final-eval | 61 questions x 4 configs, Nova Pro judge, $0.94: hybrid+rerank best retrieval (MRR 0.93), all should-refuse refused; README updated
 - 2026-11-18 | 30 web-ui | Streamlit page: examples, 4 search setups, answer + source cards + superseded badge, refusal reason, time/cost; display helpers unit-tested, page smoke-tested with AppTest
 - 2026-11-19 | 31 abbreviations | glossary of 26 corpus abbreviations spelled out before routing/search; "What is RCM?" now routes to GST and answers (was refused)
+- 2026-11-21 | 32 one-click-start | start.bat: starts Docker Desktop + database if needed, opens the web page on 127.0.0.1:8501; CRLF pinned via .gitattributes

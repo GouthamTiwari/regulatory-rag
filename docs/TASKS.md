@@ -381,3 +381,9 @@ If a task needs a new dependency, a new setting or a change to a type, work stop
 - **Files:** N `src/regrag/query/abbreviations.py`, `tests/query/test_abbreviations.py`; E `src/regrag/query/pipeline.py`, `README.md`.
 - **Why:** "What is RCM?" was refused (top rerank score 0.0051 < 0.01, routed to both) although 5 GST circulars cover reverse charge.
 - **Acceptance:** "What is RCM?" routes to GST and gets a cited answer; the result keeps the question as typed; unit tests need no AWS or Docker.
+
+## Task 32: One-click start (added after v1)
+
+- **Files:** N `start.bat`, `.gitattributes`; E `README.md`.
+- **Do:** A double-click launcher for Windows: check `uv` and `.env`, start Docker Desktop if its engine is down (wait up to 3 minutes), `docker compose up -d`, then run the web page bound to 127.0.0.1. Clear messages and a pause on every failure.
+- **Acceptance:** Double-clicking `start.bat` with Docker closed ends with the page answering at http://localhost:8501.

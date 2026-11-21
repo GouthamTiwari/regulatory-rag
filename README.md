@@ -112,6 +112,8 @@ uv run python -m regrag.ingest.pipeline --skip-download                 # parse,
 
 **Web page** (opens http://localhost:8501): ask a question, pick one of the four search setups, and see the answer with source cards, supersession warnings, time and cost.
 
+**One click (Windows):** after setup, double-click `start.bat` in the project folder. It starts Docker Desktop and the database if needed, then opens the page. Close its window to stop. For a desktop icon: right-click `start.bat` → *Send to* → *Desktop (create shortcut)*.
+
 ```powershell
 uv run streamlit run src/regrag/ui/app.py
 ```
@@ -156,6 +158,7 @@ src/regrag/
   eval/       golden, metrics, judge, run
   ui/         Streamlit web page (app) + testable display helpers (view)
 data/         manifest.csv, relations.csv, golden/golden.jsonl  (raw PDFs gitignored)
+start.bat     one-click launcher for the web page (Windows)
 docs/         SPEC.md, TASKS.md, CHANGELOG.md, changelogs/, eval/
 ```
 
