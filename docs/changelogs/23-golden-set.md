@@ -6,7 +6,7 @@ Branch: task/23-golden-set | Date: 2026-11-16
   - Contents: the 10 example questions from SPEC section 1, plus 10 more. In total: 7 factual, 2 table, 4 cross-corpus, 4 superseded, 3 abstain.
   - `expected_doc_ids` were chosen from the manifest topics and the verified relations (e.g. PSL 2020 → `rbi-11959` and its successor `rbi-12799`; warranty → `gst-195-07-2023` and `gst-216-10-2024`; corrigendum → `gst-237-31-2024` and `gst-237-31-2024-corr`).
   - `expected_sections` are left empty, so metrics fall back to document-level matching (SPEC 6.3).
-  - Reference answers are `TODO: Goutham to confirm …` (abstain rows state why they should abstain). **Every row has `reviewed: false`**, so none counts in results until Goutham checks it (SPEC 6.2).
+  - Reference answers are placeholders to confirm from the cited document (abstain rows state why they should abstain). **Every row has `reviewed: false`**, so none counts in results until it is reviewed (SPEC 6.2).
 - `src/regrag/eval/golden.py`: `load_golden(path, include_unreviewed=False, known_doc_ids=None)`.
   - **Checks every row:** required fields and their types, `schema_version == 1`, allowed `corpus`/`type`/`source` values, unique ids, and that abstain rows have no expected docs while answerable rows have at least one. `type == "abstain"` must agree with `should_abstain`, `expected_sections` docs must be among `expected_doc_ids`, and doc ids must exist in the manifest when it's given.
   - **Unknown fields are kept** in `extra` (the schema only grows), and all problems are reported together.

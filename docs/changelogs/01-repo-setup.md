@@ -23,7 +23,7 @@ Branch: task/01-repo-setup | Date: 2026-11-16
 - `tests/test_smoke.py`: 12 tests (import, env template contents, empty values, marker-selection helper, opt-in exit codes, narrow-hook guard), result: 12 passed, 0 failed.
 
 ## Out of scope / follow-ups
-- Started by a builder subagent, which was stopped when the workflow switched to standalone. The main session then finished, checked and committed the work.
+- An earlier attempt was stopped part-way; the work was then finished, checked and committed.
 - The opt-in exit-code tests run pytest in a subprocess (~4 s). They're acceptable for now, and can be removed once real `live`/`db` tests exist.
 
 ## Review log

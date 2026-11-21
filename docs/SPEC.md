@@ -1,6 +1,6 @@
 # Regulatory RAG (RBI + GST): Specification v1
 
-Status: APPROVED 2026-11-16. Written 2026-11-15 by `spec-writer`; revised 2026-11-16 with Goutham's decisions (section 11).
+Status: APPROVED 2026-11-16. Written 2026-11-15; revised 2026-11-16 with the decisions in section 11.
 Facts marked **[verified]** were checked on the web on 2026-11-15 (source URL given).
 Facts marked **[to verify]** could not be confirmed and must be checked by the task that first uses them.
 
@@ -378,7 +378,7 @@ Package name: `regrag` (in `src/regrag/`). Every number below is a **starting va
 | Stage | Input | Output | Key parameters (start value: why) |
 |---|---|---|---|
 | **Router** | Question | `rbi`, `gst` or `both` | Step 1, keyword rules (e.g. "ITC", "GSTR", "place of supply" → gst; "KYC", "NBFC", "PPI" → rbi). Step 2, if rules are silent or hit both sides, ask Haiku to choose one word. Unsure → `both`: searching too widely costs a little accuracy; searching the wrong corpus loses the answer |
-| **Keyword retrieve ("BM25")** | Question, route | Top 30 chunks | Postgres full-text search, `websearch_to_tsquery` + `ts_rank_cd`. **Honest note:** this is Postgres's ranking, which is similar in spirit to BM25 but not the exact formula. The config name stays `bm25` (short, and matches `CLAUDE.md`), but every results table and the README label it **"keyword (Postgres FTS, BM25-like)"**. True BM25 is a non-goal for v1 |
+| **Keyword retrieve ("BM25")** | Question, route | Top 30 chunks | Postgres full-text search, `websearch_to_tsquery` + `ts_rank_cd`. **Honest note:** this is Postgres's ranking, which is similar in spirit to BM25 but not the exact formula. The config name stays `bm25` (short, and matches the target architecture), but every results table and the README label it **"keyword (Postgres FTS, BM25-like)"**. True BM25 is a non-goal for v1 |
 | **Vector retrieve** | Question embedding, route | Top 30 chunks | Cosine distance on the HNSW index; `hnsw.ef_search = 100`: higher than the default 40 so filtered searches still return 30 rows |
 | **Fuse (RRF)** | Two ranked lists | Top 30 fused | Reciprocal Rank Fusion, `score = sum(1 / (k + rank))`, **k = 60**: the value from the original RRF paper; it uses ranks, not raw scores, so the two very different scoring scales need no calibration |
 | **Rerank** | Question + 30 chunks | Top 8 with scores 0 to 1 | Amazon Rerank 1.0 via `InvokeModel` (Cohere Rerank 3.5 on the upgrade path). 30 documents = 1 billed search unit ($0.001). **top_n = 8**: enough context for multi-part questions, small enough to keep the prompt cheap. Request and response field names for each reranker **[to verify in Task 11's live test]**; the code keeps one small adapter per reranker model |
@@ -464,7 +464,7 @@ Output: `docs/eval/results.md` (table) and `docs/eval/results.json` (raw), commi
 
 ## 7. Interfaces (the contract between tasks)
 
-Defined once in `src/regrag/interfaces.py` as `typing.Protocol` classes, with plain dataclasses in `src/regrag/types.py`. *Why Protocols:* a builder can write and test the fusion code against a fake retriever before the real one exists, and later projects can swap a part without touching the others.
+Defined once in `src/regrag/interfaces.py` as `typing.Protocol` classes, with plain dataclasses in `src/regrag/types.py`. *Why Protocols:* the fusion code can be written and tested against a fake retriever before the real one exists, and later projects can swap a part without touching the others.
 
 ```python
 class Embedder(Protocol):
@@ -537,7 +537,7 @@ Each runnable stage has its own entry point (`uv run python -m regrag.ingest.pip
 | **Eval dataset classification** | Reads and appends to `data/golden/golden.jsonl` | Stable schema with `schema_version`, `type`, `tags`, `source`, `reviewed`; loader ignores unknown extra fields |
 | **LoRA fine-tuning** | Exports training pairs from `query_logs` + golden set; a fine-tuned model is used by writing a new `Generator` (or `Reranker`) | `query_logs` stores question, chunk IDs, answer and citations; `Generator` protocol hides which model answers |
 
-Rule for builders: pipeline stages receive their collaborators as arguments (dependency injection) and never construct a Bedrock client or database connection inside a function body. *Why:* that is what makes mocking in tests, and swapping in later projects, possible.
+Rule for all code: pipeline stages receive their collaborators as arguments (dependency injection) and never construct a Bedrock client or database connection inside a function body. *Why:* that is what makes mocking in tests, and swapping in later projects, possible.
 
 ---
 

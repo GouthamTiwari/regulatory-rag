@@ -135,4 +135,4 @@ def test_handwritten_questions_point_at_real_documents():
 def test_committed_golden_set_is_reviewed_and_large_enough():
     items = load_golden(GOLDEN_PATH, include_unreviewed=True)
     assert len(items) >= 60 and all(i.reviewed for i in items)
-    assert all("assistant-reviewed" in i.tags for i in items)  # honest provenance
+    assert all("llm-reviewed" in i.tags for i in items)  # honest provenance

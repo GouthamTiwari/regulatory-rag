@@ -8,7 +8,7 @@ Branch: task/28-final-eval | Date: 2026-11-16
 - `docs/eval/tuning-notes.md`:
   - every changed setting, with old value, new value and evidence: the abstain threshold 0.30 → 0.01 calibrated in Task 22, plus the two quota pacers;
   - a reading of the table, the judge comparison and the next experiments.
-- `README.md` (Task 29's file): the evaluation section now shows the final table, a reading, and a **disclosure that the golden set was reviewed by an AI assistant** (rows tagged `assistant-reviewed`). Test count and cost line updated.
+- `README.md` (Task 29's file): the evaluation section now shows the final table, a reading, and a **disclosure that the golden set was reviewed by an LLM, not a human** (rows tagged `llm-reviewed`). Test count and cost line updated.
 - `src/regrag/config.py` is **unchanged**: the threshold was already calibrated in Task 22, and no other experiment was run (see below).
 
 ## Final table
@@ -29,7 +29,7 @@ Citation validity was 1.00 everywhere, abstention recall 1.00 everywhere, and th
 - All tests still pass with the defaults: 335 passed.
 
 ## Out of scope / follow-ups
-- A human review of the 61 golden rows (they are assistant-reviewed).
+- A human review of the 61 golden rows (they are LLM-reviewed).
 - Experiments: `rerank_top_n` 12; per-corpus retrieval for `both` questions; storing the rerank score and abstain reason per row for free threshold sweeps.
 
 ## Review log

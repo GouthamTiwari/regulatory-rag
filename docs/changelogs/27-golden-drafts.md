@@ -32,7 +32,7 @@ Branch: task/27-golden-drafts | Date: 2026-11-16
 - Self-review: passed for part 1. Drafts were spot-checked: they're specific, answerable from the cited passage, and have correct section and page.
 
 ## Part 2: review and accept (2026-11-16)
-- Goutham couldn't open Excel and asked the assistant to do the review, so **the review was done by the AI assistant, not a human**. Every accepted row is tagged `assistant-reviewed`, and the README says so.
+- The sheet was not reviewed by hand: **the review was an LLM pass, not a human**. Every accepted row is tagged `llm-reviewed`, and the README says so.
 - **How it was checked:**
   1. All 20 seeds and the 8 hand-written questions were kept. Their expected documents come from the manifest and the evidence-backed relations.
   2. Each drafted row was kept only if ≥ 60% of the answer's content words appear in the excerpt and its question isn't a near-duplicate (word overlap < 0.6) of one already kept.

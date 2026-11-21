@@ -73,7 +73,7 @@ Citation validity was 1.00 for every configuration (enforced by the validator). 
 
 **Reading.** Reranking gives the best retrieval (MRR 0.93 vs 0.83 for vector alone). Hybrid search *without* a reranker was slightly worse than vector alone here: keyword search pulls in partly matching passages that the reranker then filters out. The remaining errors are mostly **wrong refusals** on cross-corpus questions. Latency for the reranked setup is almost all waiting for the account's 2-requests-per-minute rerank quota.
 
-> **About the golden set:** the questions were drafted from real passages by the LLM, plus 8 written by hand. They were **reviewed by an AI assistant**, not a human: answers checked for support in the source passage, near-duplicates removed, 2 of 63 dropped. Each row is tagged `assistant-reviewed` in [`data/golden/golden.jsonl`](data/golden/golden.jsonl). A human review pass is the next step.
+> **About the golden set:** the questions were drafted from real passages by the LLM, plus 8 written by hand. They were **reviewed by an LLM pass**, not a human: answers checked for support in the source passage, near-duplicates removed, 2 of 63 dropped. Each row is tagged `llm-reviewed` in [`data/golden/golden.jsonl`](data/golden/golden.jsonl). A human review pass is the next step.
 
 Calibration of the abstain threshold (out-of-corpus questions scored about 100× lower than answerable ones): [Task 22 changelog](docs/changelogs/22-query-pipeline.md).
 

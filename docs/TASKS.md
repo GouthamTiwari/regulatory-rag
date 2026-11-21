@@ -4,8 +4,8 @@ Status: APPROVED 2026-11-16. Read `docs/SPEC.md` first; section numbers below re
 
 ## How to read this file
 
-- Each task is sized for one builder session, on its own branch `task/<NN>-<slug>` in its own worktree.
-- **Files** lists every file the task may create (C) or edit (E). A builder must not touch any other file, except its own changelog `docs/changelogs/<NN>-<slug>.md`.
+- Each task is sized for one working session, on its own branch `task/<NN>-<slug>`.
+- **Files** lists every file the task may create (C) or edit (E). A task must not touch any other file, except its own changelog `docs/changelogs/<NN>-<slug>.md`.
 - **Parallel** says which tasks it may run alongside. Two tasks that touch the same file are never parallel.
 - Unit tests never call AWS (Bedrock is mocked). Tests marked `live` call real Bedrock; tests marked `db` need the Docker Postgres. Plain `uv run pytest` skips both.
 - Every task also ends with: `uv run ruff check .` and `uv run ruff format --check .` pass, and `uv run pytest` passes.
@@ -28,7 +28,7 @@ Run the groups in order. Inside a group, all tasks can run at the same time.
 
 29 tasks in 9 groups.
 
-The groups say what is **safe** to run at the same time, not what must run at once. The orchestrator may run a large group (G3 has 10 tasks, G4 has 7) in waves of 3 to 4 builders. *Why:* each finished branch still needs a changelog check and a review, and smaller waves keep that manageable.
+The groups say what is **safe** to run at the same time, not what must run at once. A large group (G3 has 10 tasks, G4 has 7) can run in waves of 3 to 4 tasks. *Why:* each finished branch still needs a changelog check and a review, and smaller waves keep that manageable.
 
 ### Shared files and who owns them
 
@@ -45,9 +45,9 @@ These rules are what make the parallel groups safe.
 | `data/golden/golden.jsonl` | 23, then 27 | |
 | `data/manifest.csv`, `data/relations.csv` | 05, then 14 (sha256 and reviewed relations only) | |
 | `docs/eval/results.md`, `docs/eval/results.json` | 26 (sample), 28 (real) | |
-| `docs/CHANGELOG.md` | orchestrator only | |
+| `docs/CHANGELOG.md` | merge step only | |
 
-If a builder finds it needs a new dependency, a new setting or a change to a type, it stops and reports under "Out of scope / follow-ups". The orchestrator then schedules a small sequential fix task. *Why:* a quiet edit to a shared file is how parallel branches end up in merge conflicts.
+If a task needs a new dependency, a new setting or a change to a type, work stops and it is reported under "Out of scope / follow-ups". A small sequential fix task follows. *Why:* a quiet edit to a shared file is how parallel branches end up in merge conflicts.
 
 ---
 
@@ -89,7 +89,7 @@ If a builder finds it needs a new dependency, a new setting or a change to a typ
 
 - **Files:** C `docker-compose.yml`, C `src/regrag/db/schema.sql`, C `src/regrag/db/connection.py`, C `src/regrag/db/init.py`, C `tests/db/conftest.py`, C `tests/db/test_schema.py`
 - **Depends on:** 02. **Parallel:** G3.
-- **Do:** Compose service `db` using `pgvector/pgvector:pg17`, host port from `POSTGRES_PORT` (default 5433), credentials from `.env`, named volume, healthcheck. `schema.sql` per SPEC section 4 (extension, four tables, indexes), safe to run twice. `connection.py` gives a `connect()` helper that registers the pgvector type. `python -m regrag.db.init` applies the schema. `tests/db/conftest.py` provides a fixture that creates a throw-away Postgres schema per test session and drops it afterwards. *Why:* several builders may run `db` tests against the same container at once.
+- **Do:** Compose service `db` using `pgvector/pgvector:pg17`, host port from `POSTGRES_PORT` (default 5433), credentials from `.env`, named volume, healthcheck. `schema.sql` per SPEC section 4 (extension, four tables, indexes), safe to run twice. `connection.py` gives a `connect()` helper that registers the pgvector type. `python -m regrag.db.init` applies the schema. `tests/db/conftest.py` provides a fixture that creates a throw-away Postgres schema per test session and drops it afterwards. *Why:* several branches may run `db` tests against the same container at once.
 - **Acceptance:**
   - `docker compose up -d` then `uv run python -m regrag.db.init` succeeds twice in a row.
   - `uv run pytest -m db tests/db/test_schema.py` passes: tables and indexes exist; inserting a chunk fills `tsv` automatically; a 1024-length vector round-trips; a 1023-length vector is rejected; deleting a document deletes its chunks.
@@ -104,7 +104,7 @@ If a builder finds it needs a new dependency, a new setting or a change to a typ
   - Unit tests: missing credentials give the clear error; cost of 1M Nova 2 Lite input tokens on the global profile is 0.35 and 1M output tokens is 2.95 (Mumbai); 1 Amazon Rerank search unit is 0.001 (Tokyo); 1M Titan tokens is 0.024 (Mumbai).
   - No secret value appears in any exception message or log line (test).
   - Unit test: 1M Nova Pro input tokens cost 0.94 and 1M output tokens cost 3.76; upgrade-path IDs (Haiku 5.5, Sonnet 5.5, Cohere Rerank 3.5) are priced too.
-  - `live` test: one minimal `Converse` call to the configured LLM (`global.amazon.nova-2-lite-v1:0`) returns text and a `usage` block. **This is the first proof that the account has Bedrock access from Tokyo.** If it fails with an access or subscription error, the builder stops and reports the exact error (no workarounds). Changelog records which auth option was used (not the key) and confirms or corrects the IAM ARNs in SPEC section 2.3.
+  - `live` test: one minimal `Converse` call to the configured LLM (`global.amazon.nova-2-lite-v1:0`) returns text and a `usage` block. **This is the first proof that the account has Bedrock access from Tokyo.** If it fails with an access or subscription error, work stops and the task reports the exact error (no workarounds). Changelog records which auth option was used (not the key) and confirms or corrects the IAM ARNs in SPEC section 2.3.
   - Before the live test, Goutham has done the two console steps in SPEC section 2.3 (credits confirmed by AWS Support; budget alarm created with "Credits" excluded). The changelog records "done" or "not done", nothing more.
 
 ## Task 05: Manifest and relations files
@@ -295,7 +295,7 @@ If a builder finds it needs a new dependency, a new setting or a change to a typ
 
 - **Files:** C `data/golden/golden.jsonl`, C `src/regrag/eval/golden.py`, C `tests/eval/test_golden.py`
 - **Depends on:** 02. **Parallel:** G3.
-- **Do:** Loader/validator for the schema in SPEC section 6.1 (required fields, allowed values, unique ids, unknown extra fields tolerated, `reviewed=false` rows excluded unless `--include-unreviewed`). Seed 20 hand-written rows: the 10 example questions from SPEC section 1 plus 10 more (at least 3 `superseded`, 3 `abstain`, 2 `cross_corpus`). Reference answers may be left as `"TODO: Goutham to confirm"` with `reviewed=false` where the builder cannot read the source document.
+- **Do:** Loader/validator for the schema in SPEC section 6.1 (required fields, allowed values, unique ids, unknown extra fields tolerated, `reviewed=false` rows excluded unless `--include-unreviewed`). Seed 20 hand-written rows: the 10 example questions from SPEC section 1 plus 10 more (at least 3 `superseded`, 3 `abstain`, 2 `cross_corpus`). Reference answers may be left as placeholders with `reviewed=false` where the source document could not be read.
 - **Acceptance:**
   - `uv run python -m regrag.eval.golden --check` prints counts by type and corpus and exits 0.
   - Tests: bad `type` rejected; duplicate id rejected; extra field accepted; abstain rows must have empty `expected_doc_ids`.
@@ -337,7 +337,7 @@ If a builder finds it needs a new dependency, a new setting or a change to a typ
 
 - **Files:** C `src/regrag/eval/draft_questions.py`, C `tests/eval/test_draft_questions.py`, E `data/golden/golden.jsonl`
 - **Depends on:** 14, 23. **Parallel:** G6 (with 22).
-- **Do:** `python -m regrag.eval.draft_questions --per-corpus 60 --out data/golden/drafts.jsonl`: samples chunks spread across documents (and a set of table chunks), asks the default LLM (Nova 2 Lite) for candidate question + answer + the section it came from, writes drafts with `source="llm_drafted", reviewed=false`. `drafts.jsonl` is a scratch file and is **not** committed (the builder adds nothing to `.gitignore`; it simply does not stage it, and says so in the changelog). Goutham reviews; accepted rows are appended to `golden.jsonl` with `reviewed=true`. Hand-write the `superseded`, `cross_corpus` and `abstain` rows to reach the counts in SPEC section 6.2.
+- **Do:** `python -m regrag.eval.draft_questions --per-corpus 60 --out data/golden/drafts.jsonl`: samples chunks spread across documents (and a set of table chunks), asks the default LLM (Nova 2 Lite) for candidate question + answer + the section it came from, writes drafts with `source="llm_drafted", reviewed=false`. `drafts.jsonl` is a scratch file and is **not** committed (nothing is added to `.gitignore`; it is simply not staged, and says so in the changelog). Goutham reviews; accepted rows are appended to `golden.jsonl` with `reviewed=true`. Hand-write the `superseded`, `cross_corpus` and `abstain` rows to reach the counts in SPEC section 6.2.
 - **Acceptance:**
   - Mocked test: sampling covers every document at least once before repeating; output rows validate against the loader.
   - `golden.jsonl` has at least 110 reviewed rows with counts per type within 3 of the plan in SPEC section 6.2. **Fallback, only if Goutham says review time has run short: at least 60 reviewed rows** with the halved mix in SPEC section 6.2 (18 RBI, 18 GST, 5 table, 5 cross-corpus, 7 superseded, 7 abstain; each within 2). The changelog states which target was used and the final counts per type.
@@ -360,9 +360,9 @@ If a builder finds it needs a new dependency, a new setting or a change to a typ
 
 - **Files:** E `README.md`
 - **Depends on:** 28. **Parallel:** no (G9).
-- **Do:** Complete the README: what the project is and is not (disclaimer); a Mermaid architecture diagram of both the ingest and query flows from `CLAUDE.md`; setup steps for Windows PowerShell (clone, `uv sync`, copy `.env.example` to `.env`, choose one auth option, `docker compose up -d`, init schema, ingest, ask a question, run the eval); the eval results table copied from `docs/eval/results.md` with a two-line reading of it; "Design decisions" (region choice and why not Mumbai, why hybrid + RRF, why rerank via `InvokeModel`, why Postgres for both searches and why the keyword leg is labelled "keyword (Postgres FTS, BM25-like)" rather than BM25, how supersession is handled, why abstain, why the final judge is Sonnet while development uses Haiku); cost notes including the credits and budget-alarm advice from SPEC section 2.3; "Extension points" summary linking to SPEC section 10; known limitations (GST circulars 251 and above are not included; golden-set size actually used).
+- **Do:** Complete the README: what the project is and is not (disclaimer); a Mermaid architecture diagram of both the ingest and query flows from the target architecture; setup steps for Windows PowerShell (clone, `uv sync`, copy `.env.example` to `.env`, choose one auth option, `docker compose up -d`, init schema, ingest, ask a question, run the eval); the eval results table copied from `docs/eval/results.md` with a two-line reading of it; "Design decisions" (region choice and why not Mumbai, why hybrid + RRF, why rerank via `InvokeModel`, why Postgres for both searches and why the keyword leg is labelled "keyword (Postgres FTS, BM25-like)" rather than BM25, how supersession is handled, why abstain, why the final judge is Sonnet while development uses Haiku); cost notes including the credits and budget-alarm advice from SPEC section 2.3; "Extension points" summary linking to SPEC section 10; known limitations (GST circulars 251 and above are not included; golden-set size actually used).
 - **Acceptance:**
-  - A fresh clone can go from nothing to a first answer by following only the README (reviewer walks through the commands).
+  - A fresh clone can go from nothing to a first answer by following only the README (checked by walking through the commands).
   - The Mermaid block renders on GitHub.
   - The numbers in the README table equal those in `docs/eval/results.md`, and the keyword row uses the label "keyword (Postgres FTS, BM25-like)".
   - No secret, account ID, employer name or personal detail appears anywhere in the file.

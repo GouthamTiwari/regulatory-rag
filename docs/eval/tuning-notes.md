@@ -1,6 +1,6 @@
 # Tuning notes (Task 28)
 
-Final run: 2026-11-16, 61 golden questions (assistant-reviewed, 33 with section-level gold) × 4 configurations, generator Nova 2 Lite, judge **Nova Pro** (`apac.amazon.nova-pro-v1:0`), 0 errors, total cost **$0.94**.
+Final run: 2026-11-16, 61 golden questions (LLM-reviewed, 33 with section-level gold) × 4 configurations, generator Nova 2 Lite, judge **Nova Pro** (`apac.amazon.nova-pro-v1:0`), 0 errors, total cost **$0.94**.
 
 ## Settings changed
 | Setting | Old | New | Evidence |
