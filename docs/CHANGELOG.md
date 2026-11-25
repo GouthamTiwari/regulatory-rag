@@ -39,3 +39,4 @@ One line per merged task: date | task | summary.
 - 2026-11-19 | 31 abbreviations | glossary of 26 corpus abbreviations spelled out before routing/search; "What is RCM?" now routes to GST and answers (was refused)
 - 2026-11-21 | 32 one-click-start | start.bat: starts Docker Desktop + database if needed, opens the web page on 127.0.0.1:8501; CRLF pinned via .gitattributes
 - 2026-11-26 | 33 statute-ingest | CGST Act, CGST Rules and IGST Act from the CBIC portal's current section pages: 2,501 clause-level chunks, amendment notes labelled as history, vector reuse on re-ingest; cost $0.018 incl. a lost first run
+- 2026-11-26 | 34 section-lookup | provisions named in a question are pinned first (rule 36(4), s.16(2)(aa), IGST s.19); other Acts ignored; statute citations show sections and link to section pages
