@@ -41,3 +41,4 @@ One line per merged task: date | task | summary.
 - 2026-11-26 | 33 statute-ingest | CGST Act, CGST Rules and IGST Act from the CBIC portal's current section pages: 2,501 clause-level chunks, amendment notes labelled as history, vector reuse on re-ingest; cost $0.018 incl. a lost first run
 - 2026-11-26 | 34 section-lookup | provisions named in a question are pinned first (rule 36(4), s.16(2)(aa), IGST s.19); other Acts ignored; statute citations show sections and link to section pages
 - 2026-11-26 | 35 newer-docs | 16 circulars 251-266 (to Oct 2026) from the CBIC portal list + 4 GSTN IMS/GSTR-2B advisories; 212 withdrawn by 253; 255 chunks, $0.0017
+- 2026-11-26 | 36 api-eval | regrag.api (search/answer/corpus_version); 21 statute golden questions: Recall@10 1.00, MRR 0.85, faithfulness 0.99, 3 wrong refusals; $0.09; v1.1.0
