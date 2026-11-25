@@ -1,6 +1,6 @@
 # Regulatory RAG (RBI + GST)
 
-A retrieval-augmented question-answering system over **Indian banking regulation (RBI Master Directions)** and **GST circulars (CBIC)**. Every answer cites the document, section and page it came from. The system **warns when a rule has been superseded or amended**, **refuses to answer when the evidence is weak**, and is **measured** against a golden question set comparing four retrieval strategies.
+A retrieval-augmented question-answering system over **Indian banking regulation (RBI Master Directions)** and **GST law: the CGST Act, CGST Rules and IGST Act, plus CBIC circulars and GSTN advisories**. Every answer cites the document, section and page it came from. The system **warns when a rule has been superseded or amended**, **refuses to answer when the evidence is weak**, and is **measured** against a golden question set comparing four retrieval strategies.
 
 ```text
 > uv run python -m regrag.query "Under the 2020 Priority Sector Lending Master Direction, what is the overall PSL target for a domestic commercial bank?"
@@ -21,7 +21,12 @@ route=rbi  config=hybrid_rerank  time=24.9s  cost=$0.00170
 This is not legal or tax advice. Check the cited documents before acting.
 ```
 
-**Corpus:** 65 official documents (25 RBI Master Directions, 40 CBIC GST circulars), 1,210 pages, 251 tables → 2,265 section-aware chunks. Source URLs and PDF fingerprints are in [`data/manifest.csv`](data/manifest.csv); the PDFs themselves are not committed.
+**Corpus (v1.1):** 88 official documents → 5,012 section-aware chunks.
+- **RBI:** 25 Master Directions.
+- **GST law:** the CGST Act, CGST Rules and IGST Act, taken from the CBIC tax portal's current per-section pages and cut by sub-section and clause, so answers cite e.g. *CGST Rules 36(4)*. Amendment notes are kept apart and labelled as history.
+- **GST guidance:** 56 CBIC circulars (2023 to 266/12/2026 of 28 October 2026) and 4 GSTN advisories on GSTR-2B and the Invoice Management System.
+
+Source URLs and fingerprints are in [`data/manifest.csv`](data/manifest.csv); the documents themselves are not committed.
 
 ## Architecture
 
@@ -77,6 +82,22 @@ Citation validity was 1.00 for every configuration (enforced by the validator). 
 
 Calibration of the abstain threshold (out-of-corpus questions scored about 100× lower than answerable ones): [Task 22 changelog](docs/changelogs/22-query-pipeline.md).
 
+### v1.1: questions on the GST Act and Rules
+
+21 new golden questions (20 that name or need a specific provision of the CGST Act, CGST Rules or IGST Act, with the exact provision as section-level gold, and 1 that should be refused), hybrid + rerank only, judge **Nova Pro**, run cost **$0.09**. Full output: [`docs/eval/v1.1/results.md`](docs/eval/v1.1/results.md). The v1 table above is unchanged.
+
+| Configuration | Recall@5 | Recall@10 | MRR | Citation validity | Citation accuracy | Faithfulness | Abstention accuracy |
+|---|---|---|---|---|---|---|---|
+| hybrid + rerank, v1.1 corpus | 0.95 | 1.00 | 0.85 | 1.00 | 0.68 | 0.99 | 0.86 |
+
+**Reading:**
+- **Retrieval:** the right provision was in the top 10 for every question, and in the top 5 for 20 of 21.
+- **Answers:** faithful to their sources (0.99), and every citation is valid.
+- **Wrong refusals:** three questions were refused although the right passage had been found: blocked credit on motor vehicles under s.17(5), the 180-day payment rule (r.37), and who must register under s.22. Their rerank scores fell under the abstain threshold that v1 calibrated on circulars. The threshold was **not** re-tuned on these same 21 questions, so the numbers stay honest; re-calibrating it on a separate set is the next step.
+- **Citation accuracy (0.68):** counts only the single gold provision, so an answer that also cites a related circular scores lower.
+
+The new questions were written by the assistant and are tagged `llm-reviewed` and `v1.1`, like the rest of the set.
+
 ## Setup (Windows PowerShell)
 
 Prerequisites: [uv](https://docs.astral.sh/uv/), Docker Desktop, Git, and an AWS account with Amazon Bedrock access.
@@ -118,6 +139,20 @@ uv run python -m regrag.ingest.pipeline --skip-download                 # parse,
 uv run streamlit run src/regrag/ui/app.py
 ```
 
+**From Python (library API, v1.1):** used by other projects, such as the agent-orchestrator, as their rule source.
+
+```python
+from regrag import api
+
+hits = api.search("invoice missing from GSTR-2B: can ITC be claimed?", k=4)   # no LLM call
+for h in hits:
+    print(h.snippet_id, h.section, h.url)        # e.g. gst-cgst-rules-2017#412 36(4) https://...
+result = api.answer("What does rule 36(4) say?")  # cited answer, or a refusal
+version = api.corpus_version()                    # changes whenever any stored document changes
+```
+
+A question that names a provision ("rule 36(4)", "s.16(2)(aa)", "IGST section 19") gets that provision first; sections of other Acts (RBI Act, Banking Regulation Act, FEMA) are ignored.
+
 **Command line:**
 
 ```powershell
@@ -125,7 +160,7 @@ uv run python -m regrag.query "Can a car dealer claim input tax credit on demo v
 uv run python -m regrag.query "..." --config hybrid       # bm25 | vector | hybrid | hybrid_rerank
 uv run python -m regrag.query "..." --json                # full result: citations, usage, latency
 uv run python -m regrag.eval --include-unreviewed --sample  # 4-way evaluation → docs/eval/
-uv run pytest                                            # 350 unit tests, no AWS or Docker needed
+uv run pytest                                            # 424 unit tests, no AWS or Docker needed
 ```
 
 ## Design decisions
@@ -166,8 +201,10 @@ The full specification is in [`docs/SPEC.md`](docs/SPEC.md), the task breakdown 
 
 ## Known limitations
 
-- Circulars only: no GST notifications, Acts or Rules; GST circulars numbered 251+ are not included.
-- No OCR: 2 near-empty scanned pages are skipped.
+- GST notifications (rates, due dates) are not included; questions about them are refused.
+- Three answerable statute questions were wrongly refused in the v1.1 evaluation (abstain threshold calibrated on circulars); see the v1.1 results.
+- Circular 266/12/2026-GST is mostly scanned pages and therefore only partly searchable.
+- No OCR: scanned pages are skipped (2 in v1; 7 in the documents added in v1.1).
 - Extracted supersession links await human review; only the 7 hand-checked links drive warnings.
 - Some section labels are imperfect (e.g. "Appendix, para 7.1" in the 2025 PSL directions).
 - The web page is for local, single-user use (one question at a time; no login).

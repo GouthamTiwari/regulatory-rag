@@ -1,6 +1,6 @@
 [project]
 name = "regrag"
-version = "0.1.0"
+version = "1.1.0"
 description = "Hybrid-search RAG over RBI and GST regulations, with citations, supersession flags and abstention."
 readme = "README.md"
 requires-python = ">=3.12,<3.13"

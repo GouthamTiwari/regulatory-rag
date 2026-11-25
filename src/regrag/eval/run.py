@@ -296,13 +296,17 @@ def main(argv: list[str] | None = None) -> int:
         "--sample", action="store_true", help='label the report "sample, not final"'
     )
     parser.add_argument("--out", type=Path, default=OUT_DIR)
+    parser.add_argument("--tag", help="only golden questions with this tag (e.g. v1.1)")
     args = parser.parse_args(argv)
     sys.stdout.reconfigure(encoding="utf-8")
 
     settings = get_settings()
     config_names = [c.strip() for c in args.configs.split(",") if c.strip()]
     everything = load_golden(include_unreviewed=True)
-    items = [i for i in everything if args.include_unreviewed or i.reviewed][: args.limit]
+    items = [i for i in everything if args.include_unreviewed or i.reviewed]
+    if args.tag:
+        items = [i for i in items if args.tag in i.tags]
+    items = items[: args.limit]
     if not items:
         print("No golden questions to run (none reviewed yet? use --include-unreviewed).")
         return 1

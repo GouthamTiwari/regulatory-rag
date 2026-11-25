@@ -104,3 +104,23 @@ def test_latency_summary_nearest_rank_p95():
 def test_mean_skips_none():
     assert mean([1.0, None, 0.0]) == 0.5
     assert mean([None]) is None
+
+
+@pytest.mark.parametrize(
+    ("wanted", "chunk_section", "relevant"),
+    [
+        ("37", "37", True),
+        ("37", "37(1)", True),
+        ("37", "137(2)", False),  # was a false hit with plain containment
+        ("37", "37A", False),
+        ("16(2)", "16(2)(aa)", True),
+        ("16(2)", "16(20)", False),
+        ("17(5)", "17(5)(d)", True),
+        ("Para 52", "Paras 50-52", False),  # non-statute labels keep containment
+        ("Para 52", "Para 52 (cont.)", True),
+    ],
+)
+def test_statute_sections_match_exactly_or_by_sub_part(wanted, chunk_section, relevant):
+    doc = "gst-cgst-rules-2017"
+    it = item(docs=(doc,), sections=({"doc_id": doc, "section_no": wanted},))
+    assert is_relevant(ChunkRef(1, doc, chunk_section), it) is relevant

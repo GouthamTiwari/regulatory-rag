@@ -1,0 +1,700 @@
+{
+  "meta": {
+    "date": "2026-11-26",
+    "questions": 21,
+    "reviewed": 21,
+    "retrieval_only": false,
+    "sample": false,
+    "sample_note": "Run on the 20 seed questions, which Goutham has not reviewed yet.",
+    "llm": "global.amazon.nova-2-lite-v1:0",
+    "judge": "apac.amazon.nova-pro-v1:0",
+    "embed": "amazon.titan-embed-text-v2:0",
+    "rerank": "amazon.rerank-v1:0",
+    "region": "ap-south-1",
+    "rerank_region": "ap-northeast-1",
+    "prices_checked_on": "2026-11-16",
+    "total_cost": 0.088212022
+  },
+  "summary": {
+    "hybrid_rerank": {
+      "questions": 21,
+      "errors": 0,
+      "recall_at_5": 0.95,
+      "recall_at_10": 1.0,
+      "mrr": 0.8454166666666667,
+      "citation_validity": 1.0,
+      "citation_accuracy": 0.6774193548387096,
+      "faithfulness": 0.9915966386554622,
+      "judge_failed": 0,
+      "abstain_accuracy": 0.8571428571428571,
+      "abstain_precision": 0.25,
+      "abstain_recall": 1.0,
+      "supersession_flag_rate": null,
+      "latency_p95_s": 30.802599999999998,
+      "mean_cost_usd": 0.0042005724761904764,
+      "total_cost_usd": 0.088212022
+    }
+  },
+  "rows": [
+    {
+      "id": "g062",
+      "type": "factual",
+      "config": "hybrid_rerank",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [
+        "C1",
+        "C2",
+        "C4",
+        "C5"
+      ],
+      "supplied": 8,
+      "cited_docs": [
+        "gst-cgst-act-2017",
+        "gst-211-05-2024",
+        "gst-237-31-2024",
+        "gst-cgst-act-2017"
+      ],
+      "expected_docs": [
+        "gst-cgst-act-2017"
+      ],
+      "faithfulness": 1.0,
+      "judge_failed": false,
+      "has_notes": true,
+      "must_flag": false,
+      "latency_ms": 3275.8,
+      "cost_usd": 0.0046634580000000005
+    },
+    {
+      "id": "g063",
+      "type": "factual",
+      "config": "hybrid_rerank",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [
+        "C1",
+        "C2",
+        "C4",
+        "C6",
+        "C8"
+      ],
+      "supplied": 8,
+      "cited_docs": [
+        "gst-cgst-rules-2017",
+        "gst-cgst-rules-2017",
+        "gst-193-05-2023",
+        "gst-193-05-2023",
+        "gst-193-05-2023"
+      ],
+      "expected_docs": [
+        "gst-cgst-rules-2017"
+      ],
+      "faithfulness": 1.0,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 29600.4,
+      "cost_usd": 0.0052949239999999995
+    },
+    {
+      "id": "g064",
+      "type": "factual",
+      "config": "hybrid_rerank",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [
+        "C1",
+        "C2",
+        "C3",
+        "C5",
+        "C8",
+        "C7"
+      ],
+      "supplied": 8,
+      "cited_docs": [
+        "gst-cgst-act-2017",
+        "gst-cgst-act-2017",
+        "gst-cgst-act-2017",
+        "gst-cgst-act-2017",
+        "gst-cgst-act-2017",
+        "gst-241-35-2024"
+      ],
+      "expected_docs": [
+        "gst-cgst-act-2017"
+      ],
+      "faithfulness": 1.0,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 29834.9,
+      "cost_usd": 0.006978732
+    },
+    {
+      "id": "g065",
+      "type": "factual",
+      "config": "hybrid_rerank",
+      "status": "ok",
+      "error": "",
+      "abstained": true,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 0.2,
+      "markers": [],
+      "supplied": 8,
+      "cited_docs": [],
+      "expected_docs": [
+        "gst-cgst-act-2017"
+      ],
+      "faithfulness": null,
+      "judge_failed": false,
+      "has_notes": true,
+      "must_flag": false,
+      "latency_ms": 28098.1,
+      "cost_usd": 0.004472086
+    },
+    {
+      "id": "g066",
+      "type": "factual",
+      "config": "hybrid_rerank",
+      "status": "ok",
+      "error": "",
+      "abstained": true,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 0.3333333333333333,
+      "markers": [],
+      "supplied": 8,
+      "cited_docs": [],
+      "expected_docs": [
+        "gst-cgst-rules-2017"
+      ],
+      "faithfulness": null,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 27479.4,
+      "cost_usd": 0.002283778
+    },
+    {
+      "id": "g067",
+      "type": "factual",
+      "config": "hybrid_rerank",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [
+        "C1",
+        "C2",
+        "C3",
+        "C5",
+        "C4"
+      ],
+      "supplied": 8,
+      "cited_docs": [
+        "gst-cgst-rules-2017",
+        "gst-cgst-rules-2017",
+        "gst-cgst-rules-2017",
+        "gst-cgst-rules-2017",
+        "gst-cgst-rules-2017"
+      ],
+      "expected_docs": [
+        "gst-cgst-rules-2017"
+      ],
+      "faithfulness": 1.0,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 30802.6,
+      "cost_usd": 0.005031376000000001
+    },
+    {
+      "id": "g068",
+      "type": "factual",
+      "config": "hybrid_rerank",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 0,
+      "recall_at_10": 1,
+      "mrr": 0.125,
+      "markers": [
+        "C2",
+        "C3",
+        "C4",
+        "C5",
+        "C6",
+        "C7",
+        "C8",
+        "C1"
+      ],
+      "supplied": 8,
+      "cited_docs": [
+        "gst-gstn-ims-advisory-2024",
+        "gst-gstn-gstr2b-tab-advisory-2024",
+        "gst-gstn-gstr2b-advisory-2021",
+        "gst-gstn-gstr2b-tab-advisory-2024",
+        "gst-gstn-gstr2b-tab-advisory-2024",
+        "gst-cgst-rules-2017",
+        "gst-cgst-rules-2017",
+        "gst-gstn-gstr2b-advisory-2021"
+      ],
+      "expected_docs": [
+        "gst-cgst-rules-2017"
+      ],
+      "faithfulness": 1.0,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 27845.2,
+      "cost_usd": 0.00567151
+    },
+    {
+      "id": "g069",
+      "type": "factual",
+      "config": "hybrid_rerank",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [
+        "C1"
+      ],
+      "supplied": 8,
+      "cited_docs": [
+        "gst-cgst-rules-2017"
+      ],
+      "expected_docs": [
+        "gst-cgst-rules-2017"
+      ],
+      "faithfulness": 1.0,
+      "judge_failed": false,
+      "has_notes": true,
+      "must_flag": false,
+      "latency_ms": 28811.0,
+      "cost_usd": 0.003880532
+    },
+    {
+      "id": "g070",
+      "type": "factual",
+      "config": "hybrid_rerank",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [
+        "C1"
+      ],
+      "supplied": 8,
+      "cited_docs": [
+        "gst-cgst-act-2017"
+      ],
+      "expected_docs": [
+        "gst-cgst-act-2017"
+      ],
+      "faithfulness": 1.0,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 29354.4,
+      "cost_usd": 0.00328254
+    },
+    {
+      "id": "g071",
+      "type": "factual",
+      "config": "hybrid_rerank",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [
+        "C1"
+      ],
+      "supplied": 8,
+      "cited_docs": [
+        "gst-igst-act-2017"
+      ],
+      "expected_docs": [
+        "gst-igst-act-2017"
+      ],
+      "faithfulness": 1.0,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 28060.7,
+      "cost_usd": 0.002481588
+    },
+    {
+      "id": "g072",
+      "type": "factual",
+      "config": "hybrid_rerank",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [
+        "C1",
+        "C4",
+        "C8",
+        "C9",
+        "C5"
+      ],
+      "supplied": 9,
+      "cited_docs": [
+        "gst-cgst-act-2017",
+        "gst-cgst-act-2017",
+        "gst-cgst-act-2017",
+        "gst-cgst-act-2017",
+        "gst-cgst-act-2017"
+      ],
+      "expected_docs": [
+        "gst-cgst-act-2017"
+      ],
+      "faithfulness": 1.0,
+      "judge_failed": false,
+      "has_notes": true,
+      "must_flag": false,
+      "latency_ms": 29912.7,
+      "cost_usd": 0.004795026
+    },
+    {
+      "id": "g073",
+      "type": "factual",
+      "config": "hybrid_rerank",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [
+        "C1",
+        "C6",
+        "C4",
+        "C5",
+        "C7"
+      ],
+      "supplied": 8,
+      "cited_docs": [
+        "gst-cgst-rules-2017",
+        "gst-cgst-rules-2017",
+        "gst-cgst-rules-2017",
+        "gst-cgst-rules-2017",
+        "gst-197-09-2023"
+      ],
+      "expected_docs": [
+        "gst-cgst-rules-2017"
+      ],
+      "faithfulness": 1.0,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 27724.8,
+      "cost_usd": 0.004787034
+    },
+    {
+      "id": "g074",
+      "type": "factual",
+      "config": "hybrid_rerank",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [
+        "C1"
+      ],
+      "supplied": 8,
+      "cited_docs": [
+        "gst-cgst-act-2017"
+      ],
+      "expected_docs": [
+        "gst-cgst-act-2017"
+      ],
+      "faithfulness": 1.0,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 29245.8,
+      "cost_usd": 0.0041796260000000005
+    },
+    {
+      "id": "g075",
+      "type": "factual",
+      "config": "hybrid_rerank",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [
+        "C1",
+        "C6",
+        "C2"
+      ],
+      "supplied": 8,
+      "cited_docs": [
+        "gst-cgst-act-2017",
+        "gst-cgst-act-2017",
+        "gst-241-35-2024"
+      ],
+      "expected_docs": [
+        "gst-cgst-act-2017"
+      ],
+      "faithfulness": 0.8571428571428571,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 29468.6,
+      "cost_usd": 0.006182015999999999
+    },
+    {
+      "id": "g076",
+      "type": "factual",
+      "config": "hybrid_rerank",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [
+        "C1",
+        "C2",
+        "C3",
+        "C8"
+      ],
+      "supplied": 8,
+      "cited_docs": [
+        "gst-cgst-rules-2017",
+        "gst-cgst-act-2017",
+        "gst-cgst-rules-2017",
+        "gst-cgst-act-2017"
+      ],
+      "expected_docs": [
+        "gst-cgst-rules-2017"
+      ],
+      "faithfulness": 1.0,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 26562.9,
+      "cost_usd": 0.004020644
+    },
+    {
+      "id": "g077",
+      "type": "factual",
+      "config": "hybrid_rerank",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [
+        "C1"
+      ],
+      "supplied": 8,
+      "cited_docs": [
+        "gst-cgst-act-2017"
+      ],
+      "expected_docs": [
+        "gst-cgst-act-2017"
+      ],
+      "faithfulness": 1.0,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 27616.0,
+      "cost_usd": 0.002121906
+    },
+    {
+      "id": "g078",
+      "type": "factual",
+      "config": "hybrid_rerank",
+      "status": "ok",
+      "error": "",
+      "abstained": true,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [],
+      "supplied": 8,
+      "cited_docs": [],
+      "expected_docs": [
+        "gst-cgst-act-2017"
+      ],
+      "faithfulness": null,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 31054.6,
+      "cost_usd": 0.003141358
+    },
+    {
+      "id": "g079",
+      "type": "factual",
+      "config": "hybrid_rerank",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [
+        "C1",
+        "C2",
+        "C3"
+      ],
+      "supplied": 8,
+      "cited_docs": [
+        "gst-cgst-act-2017",
+        "gst-cgst-act-2017",
+        "gst-cgst-act-2017"
+      ],
+      "expected_docs": [
+        "gst-cgst-act-2017"
+      ],
+      "faithfulness": 1.0,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 28979.0,
+      "cost_usd": 0.003506456
+    },
+    {
+      "id": "g080",
+      "type": "factual",
+      "config": "hybrid_rerank",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 1.0,
+      "markers": [
+        "C1",
+        "C2",
+        "C4",
+        "C5",
+        "C8"
+      ],
+      "supplied": 8,
+      "cited_docs": [
+        "gst-cgst-act-2017",
+        "gst-cgst-rules-2017",
+        "gst-cgst-rules-2017",
+        "gst-cgst-rules-2017",
+        "gst-cgst-rules-2017"
+      ],
+      "expected_docs": [
+        "gst-cgst-act-2017"
+      ],
+      "faithfulness": 1.0,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 29336.5,
+      "cost_usd": 0.005632448
+    },
+    {
+      "id": "g081",
+      "type": "factual",
+      "config": "hybrid_rerank",
+      "status": "ok",
+      "error": "",
+      "abstained": false,
+      "should_abstain": false,
+      "recall_at_5": 1,
+      "recall_at_10": 1,
+      "mrr": 0.25,
+      "markers": [
+        "C4",
+        "C6",
+        "C8",
+        "C7"
+      ],
+      "supplied": 8,
+      "cited_docs": [
+        "gst-cgst-rules-2017",
+        "gst-cgst-rules-2017",
+        "gst-cgst-rules-2017",
+        "gst-cgst-rules-2017"
+      ],
+      "expected_docs": [
+        "gst-cgst-rules-2017"
+      ],
+      "faithfulness": 1.0,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 27276.1,
+      "cost_usd": 0.0038575439999999996
+    },
+    {
+      "id": "g082",
+      "type": "abstain",
+      "config": "hybrid_rerank",
+      "status": "ok",
+      "error": "",
+      "abstained": true,
+      "should_abstain": true,
+      "recall_at_5": null,
+      "recall_at_10": null,
+      "mrr": null,
+      "markers": [],
+      "supplied": 8,
+      "cited_docs": [],
+      "expected_docs": [],
+      "faithfulness": null,
+      "judge_failed": false,
+      "has_notes": false,
+      "must_flag": false,
+      "latency_ms": 28527.3,
+      "cost_usd": 0.00194744
+    }
+  ]
+}

@@ -21,9 +21,20 @@ def is_relevant(chunk: ChunkRef, item: GoldenItem) -> bool:
     chunk_section = chunk.section_no.lower()
     for expected in item.expected_sections:
         wanted = str(expected.get("section_no", "")).lower()
-        if expected["doc_id"] == chunk.doc_id and (not wanted or wanted in chunk_section):
+        if expected["doc_id"] == chunk.doc_id and (
+            not wanted or _section_matches(wanted, chunk_section)
+        ):
             return True
     return False
+
+
+def _section_matches(wanted: str, chunk_section: str) -> bool:
+    """Statute provisions ("37", "16(2)") match exactly or a sub-part: "37" covers "37(1)"
+    but not "137" or "37a", and "16(2)" covers "16(2)(aa)" but not "16(20)". Other labels
+    ("Para 52") keep the looser containment match used since v1."""
+    if wanted[:1].isdigit():
+        return chunk_section == wanted or chunk_section.startswith(wanted + "(")
+    return wanted in chunk_section
 
 
 def recall_at_k(ranked: list[ChunkRef], item: GoldenItem, k: int) -> int:
