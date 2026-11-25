@@ -12,7 +12,10 @@ with --from-folder. (rbidocs.rbi.org.in does this for automated clients.)
 """
 
 import argparse
+import base64
 import hashlib
+import json
+import ssl
 import sys
 import time
 from collections.abc import Callable
@@ -22,6 +25,7 @@ from typing import Literal
 from urllib.parse import unquote, urlsplit
 
 import httpx
+import truststore
 
 from regrag.config import Settings, get_settings
 from regrag.ingest.manifest import REPO_ROOT, is_allowed_host, load_manifest
@@ -80,12 +84,27 @@ def _is_pdf_file(path: Path) -> bool:
 
 
 def make_client(settings: Settings) -> httpx.Client:
+    # TLS verification always on (SPEC 5): never download over a forged connection. The
+    # operating system's trust store does the checking (truststore): the CBIC portal serves an
+    # incomplete certificate chain that Windows completes but Python's bundled list cannot.
     return httpx.Client(
         timeout=settings.download_timeout_s,
         headers={"User-Agent": USER_AGENT},
         follow_redirects=True,
-        verify=True,  # TLS verification always on (SPEC 5): never download over a forged connection
+        verify=truststore.SSLContext(ssl.PROTOCOL_TLS_CLIENT),
     )
+
+
+def unwrap_portal_pdf(content: bytes) -> bytes:
+    """The CBIC tax portal serves a PDF as JSON: ``{"data": "<base64 of the PDF>"}`` (the
+    same response its own viewer reads). Anything else is returned unchanged."""
+    if not content.lstrip().startswith(b'{"data"'):
+        return content
+    try:
+        decoded = base64.b64decode(json.loads(content)["data"], validate=True)
+    except (ValueError, KeyError, TypeError):
+        return content  # not the portal's wrapper after all; the PDF check below decides
+    return decoded
 
 
 def _fetch(client: httpx.Client, row: ManifestRow, settings: Settings) -> bytes:
@@ -108,7 +127,7 @@ def _fetch(client: httpx.Client, row: ManifestRow, settings: Settings) -> bytes:
             content_type = response.headers.get("content-type", "?")
     except httpx.TransportError as exc:  # timeouts, refused or dropped connections
         raise _Retryable(type(exc).__name__) from exc
-    content = b"".join(chunks)
+    content = unwrap_portal_pdf(b"".join(chunks))
     # Check the bytes, not the content-type header: servers sometimes return an HTML
     # error page with status 200, and the header can lie in either direction.
     if not content.startswith(b"%PDF"):

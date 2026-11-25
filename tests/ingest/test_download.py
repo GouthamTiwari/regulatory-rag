@@ -261,3 +261,46 @@ def test_import_from_folder(tmp_path):
     assert "not in folder" in results["rbi-13139"].message
     # Running it again does nothing for files already imported.
     assert "rbi-13141" not in {r.doc_id for r in import_from_folder(rows, downloads, raw)}
+
+
+# --- task 35: the CBIC tax portal wraps PDFs in JSON ------------------------------------------
+
+PORTAL_URL = "https://taxinformation.cbic.gov.in/content/pdf/tax_repository/gst/circulars/x.pdf"
+
+
+def test_portal_json_wrapper_is_unwrapped(tmp_path, sleeps):
+    import base64
+    import json
+
+    wrapped = json.dumps({"data": base64.b64encode(PDF).decode()}).encode()
+    client = client_for(httpx.Response(200, content=wrapped,
+                                       headers={"content-type": "application/json"}))  # fmt: skip
+    result = download(row(pdf_url=PORTAL_URL), client, tmp_path, sleeps)
+    assert result.status == "ok" and (tmp_path / "gst-231-25-2024.pdf").read_bytes() == PDF
+    assert result.sha256 == PDF_HASH  # the hash is of the PDF, not of the JSON wrapper
+
+
+def test_portal_error_json_is_still_refused(tmp_path, sleeps):
+    error = b'{"type":"x","title":"Unauthorized","status":401}'
+    client = client_for(httpx.Response(200, content=error))
+    result = download(row(pdf_url=PORTAL_URL), client, tmp_path, sleeps)
+    assert result.status == "failed" and "not a PDF" in result.message
+
+
+def test_wrapper_with_non_pdf_data_is_refused(tmp_path, sleeps):
+    import base64
+    import json
+
+    wrapped = json.dumps({"data": base64.b64encode(b"<html>nope</html>").decode()}).encode()
+    result = download(row(pdf_url=PORTAL_URL), client_for(httpx.Response(200, content=wrapped)),
+                      tmp_path, sleeps)  # fmt: skip
+    assert result.status == "failed"
+
+
+def test_gstn_tutorial_site_is_an_official_host():
+    from regrag.ingest.manifest import is_allowed_host
+
+    url = "https://tutorial.gst.gov.in/downloads/news/revised_advisory_on_ims.pdf"
+    assert is_allowed_host(url, SETTINGS.allowed_download_hosts)
+    assert not is_allowed_host("https://tutorial.gst.gov.in.evil.example/x.pdf",
+                               SETTINGS.allowed_download_hosts)  # fmt: skip

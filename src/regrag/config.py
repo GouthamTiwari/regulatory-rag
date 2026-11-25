@@ -76,6 +76,8 @@ class Settings(BaseSettings):
         "cbic-gst.gov.in",
         "taxinformation.cbic.gov.in",
         "cbic.gov.in",
+        # GSTN's official help site: GSTR-2B and IMS advisories (task 35).
+        "tutorial.gst.gov.in",
     )
 
     # --- Chunking (SPEC 5) ------------------------------------------------------------------
