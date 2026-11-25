@@ -33,7 +33,16 @@ def connect(
         options = f"-c search_path={schema},public"
     try:
         conn = psycopg.connect(
-            settings.database_dsn(), autocommit=autocommit, connect_timeout=5, options=options
+            settings.database_dsn(),
+            autocommit=autocommit,
+            connect_timeout=5,
+            options=options,
+            # TCP keepalives: during a long embedding run the connection sits idle for many
+            # minutes, and Docker Desktop's port forwarding drops idle connections (task 33).
+            keepalives=1,
+            keepalives_idle=60,
+            keepalives_interval=10,
+            keepalives_count=5,
         )
     except psycopg.OperationalError as exc:
         # Why not re-raise as is: psycopg's message can include connection details. This

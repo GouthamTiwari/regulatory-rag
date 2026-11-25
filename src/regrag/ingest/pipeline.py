@@ -21,6 +21,8 @@ from collections.abc import Callable
 from dataclasses import dataclass, field, replace
 from pathlib import Path
 
+import httpx
+
 from regrag.bedrock.pricing import cost_usd
 from regrag.config import Settings, get_settings
 from regrag.db import repository as repo
@@ -34,6 +36,15 @@ from regrag.ingest.manifest import (
     load_relations,
 )
 from regrag.ingest.parse import ParseError, parse_pdf
+from regrag.ingest.statute import (
+    StatuteError,
+    chunk_statute,
+    fetch_statute,
+    is_statute,
+    parse_statute,
+)
+from regrag.ingest.statute import make_client as statute_make_client
+from regrag.ingest.statute import raw_path as statute_raw_path
 from regrag.ingest.supersession import extract_relations
 from regrag.interfaces import Embedder
 from regrag.types import ManifestRow, Relation
@@ -64,29 +75,71 @@ class Deps:
     conn: object | None  # psycopg connection (autocommit), None in a dry run
     raw_dir: Path = RAW_DIR
     http: object | None = None  # httpx client for downloads, None to skip downloading
+    # Client for the CBIC portal's law pages (OS trust store); made on first use if None.
+    statute_http: object | None = None
+    # Opens a fresh database connection; used when the old one died during a long embed.
+    reconnect: Callable[[], object] | None = None
+    # Re-chunk and store even if the source file is unchanged (after a chunker fix).
+    force: bool = False
+
+
+def _ensure_connection(deps: Deps) -> None:
+    """Replace a dead database connection before writing (only when we know how)."""
+    if deps.reconnect is None or deps.conn is None:
+        return
+    try:
+        deps.conn.execute("SELECT 1")
+    except Exception:  # closed by the server, Docker or a sleeping PC
+        deps.conn = deps.reconnect()
 
 
 def ingest_document(row: ManifestRow, deps: Deps, *, dry_run: bool = False) -> DocReport:
     settings = deps.settings
-    path = deps.raw_dir / f"{row.doc_id}.pdf"
-    if deps.http is not None:
-        download = download_document(row, deps.http, deps.raw_dir, settings)
-        if download.status == "failed":
-            return DocReport(row.doc_id, "failed", message=f"download: {download.message}")
-    if not path.exists():
-        return DocReport(row.doc_id, "failed", message="PDF missing: run the downloader first")
+    if is_statute(row):
+        # The bare law (task 33): saved section pages instead of a PDF.
+        path = statute_raw_path(row, deps.raw_dir)
+        if deps.http is not None and not path.exists():
+            try:
+                if deps.statute_http is None:
+                    deps.statute_http = statute_make_client(settings)
+                fetch_statute(row, deps.statute_http, settings, deps.raw_dir)
+            except (StatuteError, httpx.HTTPError) as exc:
+                return DocReport(row.doc_id, "failed", message=f"statute fetch: {exc}")
+        if not path.exists():
+            return DocReport(
+                row.doc_id,
+                "failed",
+                message="statute text missing: run python -m regrag.ingest.statute",
+            )
+    else:
+        path = deps.raw_dir / f"{row.doc_id}.pdf"
+        if deps.http is not None:
+            download = download_document(row, deps.http, deps.raw_dir, settings)
+            if download.status == "failed":
+                return DocReport(row.doc_id, "failed", message=f"download: {download.message}")
+        if not path.exists():
+            return DocReport(row.doc_id, "failed", message="PDF missing: run the downloader first")
     sha = sha256_of(path)
 
     model = settings.bedrock_embed_model_id
-    if not dry_run and repo.document_state(deps.conn, row.doc_id) == (sha, model):
+    unchanged = not deps.force and not dry_run
+    if unchanged and repo.document_state(deps.conn, row.doc_id) == (sha, model):
         return DocReport(row.doc_id, "skipped", sha256=sha, message="unchanged")
 
-    try:
-        parsed = parse_pdf(path, row.doc_id)
-    except ParseError as exc:
-        return DocReport(row.doc_id, "failed", sha256=sha, message=str(exc))
-    chunks = chunk_document(parsed, row, settings)
-    relations = extract_relations(row.doc_id, chunks, row.reference_no)
+    if is_statute(row):
+        try:
+            parsed = parse_statute(path, row.doc_id)
+            chunks = chunk_statute(path, row, settings)
+        except StatuteError as exc:
+            return DocReport(row.doc_id, "failed", sha256=sha, message=str(exc))
+        relations: list[Relation] = []  # amendments are recorded in the law text itself
+    else:
+        try:
+            parsed = parse_pdf(path, row.doc_id)
+        except ParseError as exc:
+            return DocReport(row.doc_id, "failed", sha256=sha, message=str(exc))
+        chunks = chunk_document(parsed, row, settings)
+        relations = extract_relations(row.doc_id, chunks, row.reference_no)
     texts = [embedding_text(c, row.title) for c in chunks]
     report = DocReport(
         row.doc_id,
@@ -102,9 +155,23 @@ def ingest_document(row: ManifestRow, deps: Deps, *, dry_run: bool = False) -> D
         report.cost_usd = cost_usd(model, input_tokens=report.embed_tokens)
         return report
 
-    embedded = deps.embedder.embed(texts)
-    for chunk, vector in zip(chunks, embedded.vectors, strict=True):
-        chunk.embedding = vector
+    # Reuse stored vectors for chunks whose embedded text is unchanged; pay only for the rest.
+    stored = repo.stored_embeddings(deps.conn, row.doc_id, row.title, model)
+    todo = []
+    for i, chunk in enumerate(chunks):
+        vector = stored.get((chunk.section_path or "", chunk.content))
+        if vector is None:
+            todo.append(i)
+        else:
+            chunk.embedding = vector
+    new_tokens = 0
+    if todo:
+        embedded = deps.embedder.embed([texts[i] for i in todo])
+        for i, vector in zip(todo, embedded.vectors, strict=True):
+            chunks[i].embedding = vector
+        new_tokens = embedded.input_tokens
+    report.message = f"reused {len(chunks) - len(todo)} stored vectors" if stored else ""
+    _ensure_connection(deps)  # embedding can take many minutes; the connection may be gone
     # One transaction for the document, its chunks and its extracted links.
     with deps.conn.transaction():
         repo.upsert_document(
@@ -115,8 +182,8 @@ def ingest_document(row: ManifestRow, deps: Deps, *, dry_run: bool = False) -> D
             embedding_model=model,
         )
         repo.replace_relations(deps.conn, row.doc_id, relations)
-    report.embed_tokens = embedded.input_tokens
-    report.cost_usd = cost_usd(model, input_tokens=embedded.input_tokens)
+    report.embed_tokens = new_tokens
+    report.cost_usd = cost_usd(model, input_tokens=new_tokens)
     return report
 
 
@@ -188,6 +255,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--limit", type=int)
     parser.add_argument("--skip-download", action="store_true")
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="re-chunk and store even if the file is unchanged (reuses stored vectors)",
+    )
     args = parser.parse_args(argv)
 
     settings = get_settings()
@@ -216,8 +288,13 @@ def main(argv: list[str] | None = None) -> int:
     from regrag.db.connection import connect
 
     embedder = TitanEmbedder.from_settings(get_runtime_client(settings), settings)
-    with connect(settings, autocommit=True) as conn:
-        reports = run(rows, Deps(settings, embedder, conn, http=http), progress=show)
+    with connect(settings, autocommit=True) as first_conn:
+        deps = Deps(
+            settings, embedder, first_conn, http=http,
+            reconnect=lambda: connect(settings, autocommit=True), force=args.force,
+        )  # fmt: skip
+        reports = run(rows, deps, progress=show)
+        conn = deps.conn  # may be a fresh connection after a reconnect
         stored = {r[0] for r in conn.execute("SELECT doc_id FROM documents").fetchall()}
         manual = [
             rel
@@ -228,6 +305,8 @@ def main(argv: list[str] | None = None) -> int:
         ]
         repo.load_manual_relations(conn, manual)
         resolved = repo.resolve_relation_targets(conn)
+        if conn is not first_conn:
+            conn.close()
     changed = update_manifest_hashes(
         MANIFEST_PATH, {r.doc_id: r.sha256 for r in reports if r.sha256}
     )

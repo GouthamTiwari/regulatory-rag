@@ -191,7 +191,10 @@ def test_bad_relations_are_rejected(tmp_path, overrides, message):
 def test_committed_manifest_and_relations_are_valid():
     result = load_manifest(settings=SETTINGS)
     by_corpus = {c: sum(r.corpus == c for r in result.rows) for c in ("rbi", "gst")}
-    assert by_corpus == {"rbi": 25, "gst": 40}
+    assert by_corpus == {
+        "rbi": 25,
+        "gst": 43,
+    }  # 40 circulars + the CGST Act, CGST Rules and IGST Act (task 33)
     assert result.skipped == []
     relations = load_relations(known_doc_ids={r.doc_id for r in result.rows})
     assert len(relations) >= 6
@@ -204,4 +207,4 @@ def test_committed_manifest_and_relations_are_valid():
 def test_check_command_exits_zero(capsys):
     assert main(["--check"]) == 0
     out = capsys.readouterr().out
-    assert "'rbi': 25" in out and "'gst': 40" in out
+    assert "'rbi': 25" in out and "'gst': 43" in out

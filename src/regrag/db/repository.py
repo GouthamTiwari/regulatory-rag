@@ -91,6 +91,29 @@ def upsert_document(
         insert_chunks(conn, chunks, embedding_model=embedding_model)
 
 
+def stored_embeddings(
+    conn: psycopg.Connection, doc_id: str, title: str, embedding_model: str
+) -> dict[tuple[str, str], list[float]]:
+    """(section_path, content) -> stored vector for one document, if its title and embedding
+    model are unchanged. What gets embedded is title + section path + content, so a chunk with
+    the same three can reuse its vector instead of paying for a new one."""
+    with conn.cursor() as cur:
+        cur.execute(
+            "SELECT c.section_path, c.content, c.embedding FROM chunks c "
+            "JOIN documents d USING (doc_id) "
+            "WHERE c.doc_id = %s AND d.title = %s AND c.embedding_model = %s "
+            "AND c.embedding IS NOT NULL",
+            (doc_id, title, embedding_model),
+        )
+        rows = cur.fetchall()
+    # pgvector returns its own Vector type; plain lists are what Chunk.embedding holds.
+    return {(r[0] or "", r[1]): _as_list(r[2]) for r in rows}
+
+
+def _as_list(vector) -> list[float]:
+    return vector.to_list() if hasattr(vector, "to_list") else [float(x) for x in vector]
+
+
 def insert_chunks(conn: psycopg.Connection, chunks: list[Chunk], *, embedding_model: str) -> None:
     """Insert chunks (with their vectors) in one batch."""
     with conn.cursor() as cur:

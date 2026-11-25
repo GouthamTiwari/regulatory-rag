@@ -50,6 +50,7 @@ def recorder(monkeypatch):
         state[r.doc_id] = (r.sha256, embedding_model)
 
     monkeypatch.setattr(pipeline.repo, "upsert_document", upsert)
+    monkeypatch.setattr(pipeline.repo, "stored_embeddings", lambda conn, d, t, m: {})
     monkeypatch.setattr(
         pipeline.repo, "replace_relations",
         lambda conn, d, rels: calls.append(("relations", d, len(rels))),
@@ -123,3 +124,51 @@ def test_update_manifest_hashes_changes_only_that_column(tmp_path):
     assert pipeline.update_manifest_hashes(path, {"rbi-a": "f" * 64}) == 1
     assert path.read_text(encoding="utf-8").splitlines()[1].endswith("active," + "f" * 64)
     assert pipeline.update_manifest_hashes(path, {"rbi-a": "f" * 64}) == 0
+
+
+def test_a_dead_connection_is_replaced_before_writing(tmp_path, recorder):
+    class DeadConn(FakeConn):
+        def execute(self, sql):
+            raise RuntimeError("server closed the connection unexpectedly")
+
+    class LiveConn(FakeConn):
+        def execute(self, sql):
+            return None
+
+    raw = raw_dir_with(tmp_path, ["rbi-a"], [])
+    fresh = LiveConn()
+    deps = pipeline.Deps(SETTINGS, FakeEmbedder(dimensions=8), DeadConn(), raw_dir=raw,
+                         reconnect=lambda: fresh)  # fmt: skip
+    (report,) = pipeline.run([row("rbi-a")], deps)
+    assert report.status == "ingested" and deps.conn is fresh
+
+
+def test_unchanged_chunks_reuse_stored_vectors(tmp_path, recorder, monkeypatch):
+    raw = raw_dir_with(tmp_path, ["rbi-a"], [])
+    first = FakeEmbedder(dimensions=8)
+    deps = pipeline.Deps(SETTINGS, first, FakeConn(), raw_dir=raw)
+    (report,) = pipeline.run([row("rbi-a")], deps)
+    all_texts = first.calls[0]
+    # Pretend everything but the last chunk is already stored with its vector.
+    stored = {}
+    for text in all_texts[:-1]:
+        # embedded text = title \n section path \n\n content
+        path, content = text.split("\n")[1], text.split("\n\n", 1)[1]
+        stored[(path, content)] = [0.5] * 8
+    monkeypatch.setattr(pipeline.repo, "stored_embeddings", lambda conn, d, t, m: stored)
+    second = FakeEmbedder(dimensions=8)
+    deps = pipeline.Deps(SETTINGS, second, FakeConn(), raw_dir=raw, force=True)
+    (again,) = pipeline.run([row("rbi-a")], deps)
+    assert again.status == "ingested" and second.calls == [all_texts[-1:]]
+    assert again.embed_tokens < report.embed_tokens and "reused" in again.message
+
+
+def test_force_reingests_an_unchanged_file(tmp_path, recorder):
+    raw = raw_dir_with(tmp_path, ["rbi-a"], [])
+    deps = pipeline.Deps(SETTINGS, FakeEmbedder(dimensions=8), FakeConn(), raw_dir=raw)
+    pipeline.run([row("rbi-a")], deps)
+    (skipped,) = pipeline.run([row("rbi-a")], deps)
+    assert skipped.status == "skipped"
+    deps.force = True
+    (forced,) = pipeline.run([row("rbi-a")], deps)
+    assert forced.status == "ingested"

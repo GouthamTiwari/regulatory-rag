@@ -387,3 +387,26 @@ If a task needs a new dependency, a new setting or a change to a type, work stop
 - **Files:** N `start.bat`, `.gitattributes`; E `README.md`.
 - **Do:** A double-click launcher for Windows: check `uv` and `.env`, start Docker Desktop if its engine is down (wait up to 3 minutes), `docker compose up -d`, then run the web page bound to 127.0.0.1. Clear messages and a pause on every failure.
 - **Acceptance:** Double-clicking `start.bat` with Docker closed ends with the page answering at http://localhost:8501.
+
+## Task 33: Bare GST law: CGST Act, CGST Rules, IGST Act (added for v1.1)
+
+- **Files:** N `src/regrag/ingest/statute.py`, `tests/ingest/test_statute.py`; E `src/regrag/ingest/pipeline.py`, `data/manifest.csv`, `pyproject.toml`, `uv.lock`, `tests/ingest/test_manifest.py`, `docs/SPEC.md`.
+- **Why:** the GST side held circulars only, so a question like "what does section 16(4) say?" could not be answered from the law itself. Requested by the agent-orchestrator project (its decision 7), which uses this RAG as its rule source.
+- **Do:** Read the CBIC tax portal's own section lists (the public JSON endpoints its pages use) and fetch every active section page of the three statutes, politely. The consolidated Act and Rules pages are not used: they were last updated in 2022 and miss later amendments. Save one JSON file per statute in `data/raw/`; its sha256 is the document hash. Parse one page per section; chunk by sub-section and clause with citable labels (`16(2)(aa)`). Verify TLS against the operating system's trust store (the portal's certificate chain is incomplete for Python's bundled list); verification is never turned off.
+- **Acceptance:** the three statutes ingest through the normal pipeline; s.16, s.34, s.38, s.77, r.36, r.37, r.37A, r.46, r.60 and IGST s.19 match the official snapshots used by the orchestrator; unit tests need no network, AWS or database.
+
+## Task 34: Section-aware lookup (v1.1)
+
+- **Why:** a question that names a provision ("rule 36(4)", "s.16(2)(aa)", "IGST section 19") should get that provision first, then context.
+- **Do:** detect references to sections, rules and schedules (CGST Act by default; IGST when the question says IGST; rules when it says rule); fetch the matching statute chunks and put them ahead of the reranked results; show sections, not page numbers, in citations of statute chunks.
+- **Acceptance:** unit tests for the reference parser; a live query for "What does rule 36(4) say?" cites CGST Rules r.36(4).
+
+## Task 35: Newer GST documents (v1.1)
+
+- **Do:** add the CGST circulars published after 250/07/2025 up to the build date, and the GSTN advisories on GSTR-2B and the Invoice Management System, with source URLs and hashes in the manifest.
+- **Acceptance:** each new row has an official URL and publish date; ingested and searchable.
+
+## Task 36: Library API, evaluation and v1.1.0 (v1.1)
+
+- **Do:** `regrag.api.search(query, k, corpus)` (retrieval only, no LLM) and `regrag.api.answer(question)`; about 20 new golden questions on the Act and Rules; re-run hybrid+rerank with the Nova Pro judge; add a results row (old rows stay); tag `v1.1.0`.
+- **Acceptance:** API documented and tested with fakes; README results updated; tag pushed.
