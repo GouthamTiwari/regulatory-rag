@@ -10,6 +10,7 @@ import logging
 import sys
 
 from regrag.query.pipeline import DISCLAIMER, answer_question
+from regrag.query.prompts import STATUTE_DOC_IDS
 from regrag.types import CONFIG_NAMES, PipelineConfig
 
 
@@ -18,14 +19,16 @@ def render(result) -> str:
     if result.citations:
         lines.append("Sources:")
         for c in result.citations:
-            pages = (
-                f"p. {c.page_start}"
-                if c.page_start == c.page_end
-                else f"pp. {c.page_start}-{c.page_end}"
-            )
-            lines.append(
-                f"  [{c.marker}] {c.title} | {c.section_no} | {pages}\n       {c.source_url}"
-            )
+            if c.doc_id in STATUTE_DOC_IDS:
+                where = c.section_no  # the bare law: cite the section, not a position
+            else:
+                pages = (
+                    f"p. {c.page_start}"
+                    if c.page_start == c.page_end
+                    else f"pp. {c.page_start}-{c.page_end}"
+                )
+                where = f"{c.section_no} | {pages}"
+            lines.append(f"  [{c.marker}] {c.title} | {where}\n       {c.source_url}")
         lines.append("")
     if result.supersession_notes:
         lines.append("Supersession notes:")

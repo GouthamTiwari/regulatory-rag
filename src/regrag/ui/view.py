@@ -6,6 +6,7 @@ the code, and the Streamlit file stays a thin layout layer.
 
 from dataclasses import dataclass
 
+from regrag.query.prompts import STATUTE_DOC_IDS
 from regrag.types import QueryResult
 
 # Order matters: the first entry is the default in the dropdown.
@@ -47,14 +48,21 @@ def pages_label(start: int, end: int) -> str:
     return f"p. {start}" if start == end else f"pp. {start}-{end}"
 
 
+def _location(c) -> str:
+    """Section and pages; for the bare law, the section alone (its "pages" are positions)."""
+    if c.doc_id in STATUTE_DOC_IDS:
+        return c.section_no
+    if c.section_no:
+        return f"{c.section_no} | {pages_label(c.page_start, c.page_end)}"
+    return pages_label(c.page_start, c.page_end)
+
+
 def source_cards(result: QueryResult) -> list[SourceCard]:
     return [
         SourceCard(
             marker=c.marker,
             title=c.title,
-            location=f"{c.section_no} | {pages_label(c.page_start, c.page_end)}"
-            if c.section_no
-            else pages_label(c.page_start, c.page_end),
+            location=_location(c),
             url=c.source_url,
             outdated=c.status != "active",
         )

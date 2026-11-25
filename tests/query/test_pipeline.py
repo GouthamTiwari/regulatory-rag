@@ -159,3 +159,56 @@ def test_each_configuration_builds(monkeypatch, name):
     assert type(built.reranker).__name__ == expected_reranker
     assert ("rerank" in built.model_ids) is (name == "hybrid_rerank")
     assert pipeline.DISCLAIMER  # the CLI prints it
+
+
+# --- task 34: provisions named in the question are pinned first ------------------------------
+
+
+def statute_chunk(chunk_id=99, section="36(4)"):
+    return make_chunk(
+        chunk_id,
+        doc_id="gst-cgst-rules-2017",
+        title="Central Goods and Services Tax Rules, 2017 (as amended)",
+        section_no=section,
+        page_start=40,
+        page_end=40,
+        source_url="https://taxinformation.cbic.gov.in/x",
+    )
+
+
+def test_named_provision_is_pinned_first_and_counts_as_strong_evidence():
+    asked = []
+
+    def lookup(refs):
+        asked.append([(r.doc_id, r.ref) for r in refs])
+        return [statute_chunk()]
+
+    p = parts(ScriptedGenerator(GOOD))
+    p.reranker = FakeReranker(scores={1: 0.001, 2: 0.0005})  # weak search evidence
+    p.reference_lookup = lookup
+    result = answer_question("What does rule 36(4) say?", parts=p, log=False)
+    assert asked == [[("gst-cgst-rules-2017", "36(4)")]]
+    assert [c.chunk_id for c in result.reranked][:1] == [99]
+    assert result.rerank_top_score == pytest.approx(1.0)
+    assert not result.abstained  # the weak search score alone would have refused
+
+
+def test_no_reference_means_no_lookup():
+    p = parts(ScriptedGenerator(GOOD))
+    p.reference_lookup = lambda refs: pytest.fail("lookup must not run")
+    answer_question("ITC on demo vehicles?", parts=p, log=False)
+
+
+def test_rbi_questions_are_never_pinned_to_gst_law():
+    p = parts(ScriptedGenerator(GOOD))
+    p.reference_lookup = lambda refs: pytest.fail("lookup must not run")
+    assert pipeline._pinned_references(p, "What does rule 36(4) say?", "rbi") == []
+
+
+def test_statute_sources_show_sections_not_pages():
+    from regrag.query.prompts import source_header
+
+    header = source_header("C1", statute_chunk())
+    assert "36(4)" in header and "page" not in header
+    circular = source_header("C2", make_chunk(1, section_no="Para 4", page_start=2, page_end=2))
+    assert "page 2" in circular

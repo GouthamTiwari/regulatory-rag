@@ -12,12 +12,16 @@ created; tests pass fake `Parts` instead.
 import time
 import uuid
 from dataclasses import dataclass, field
+from functools import partial
 
 from regrag.bedrock.pricing import cost_usd
 from regrag.config import Settings, get_settings
 from regrag.db import repository as repo
+from regrag.ingest.statute import section_url
 from regrag.query.abbreviations import expand_abbreviations
 from regrag.query.querylog import record
+from regrag.query.references import lookup as lookup_references
+from regrag.query.references import parse_references
 from regrag.query.supersession import apply_supersession
 from regrag.query.validate import CitationValidator, decide_abstain, run_validators
 from regrag.types import (
@@ -51,6 +55,8 @@ class Parts:
     embedder: object | None = None  # for fetching a superseding document's best chunk
     conn: object | None = None  # database: documents, links, query logs
     model_ids: dict[str, str] = field(default_factory=dict)
+    # Finds the chunks of provisions a question names (task 34); None = use the database.
+    reference_lookup: object | None = None
 
 
 def build_pipeline(config: PipelineConfig, settings: Settings | None = None, conn=None) -> Parts:
@@ -143,7 +149,7 @@ def _citations(markers: list[str], chunks: list[RetrievedChunk]) -> list[Citatio
             c = chunks[index]
             citations.append(
                 Citation(marker, c.doc_id, c.title, c.section_no, c.page_start, c.page_end,
-                         c.source_url, c.status)
+                         section_url(c.doc_id, c.section_path, c.source_url), c.status)
             )  # fmt: skip
     return citations
 
@@ -193,6 +199,15 @@ def answer_question(
     usage.rerank_queries += getattr(parts.reranker, "last_queries", 0)
     top_score = reranked[0].rerank_score if reranked and config.uses_rerank else None
 
+    # Task 34: a provision named in the question ("rule 36(4)") goes first, then context.
+    pinned = timed("references", _pinned_references, parts, expanded, route)
+    if pinned:
+        pinned_ids = {c.chunk_id for c in pinned}
+        rest = [c for c in reranked if c.chunk_id not in pinned_ids]
+        reranked = (pinned + rest)[: max(s.rerank_top_n, len(pinned))]
+        if top_score is not None:
+            top_score = max(top_score, PINNED_SCORE)
+
     shown, notes = timed("supersession", _supersession, parts, expanded, reranked, usage)
 
     draft: DraftAnswer = timed("generate", parts.generator.generate, expanded, shown)
@@ -226,6 +241,25 @@ def answer_question(
     if log:
         record(result, parts.conn)
     return result
+
+
+PINNED_SCORE = 1.0  # a provision the question names is the strongest evidence there is
+
+
+def _pinned_references(parts: Parts, question: str, route: str) -> list[RetrievedChunk]:
+    """Statute chunks for the provisions the question names (none for RBI-only questions)."""
+    references = parse_references(question)
+    if not references or route == "rbi":
+        return []
+    lookup = parts.reference_lookup
+    if lookup is None:
+        if parts.conn is None:
+            return []
+        lookup = partial(lookup_references, parts.conn)
+    chunks = lookup(references)
+    for c in chunks:
+        c.rerank_score = PINNED_SCORE
+    return chunks
 
 
 def _embed_tokens(retriever) -> int:
